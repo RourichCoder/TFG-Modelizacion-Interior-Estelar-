@@ -1,5 +1,5 @@
-import SolucionParaRtotYLtotFijos
-from SolucionParaRtotYLtotFijos import main
+import SolucionRtotYLtotFijos
+from SolucionRtotYLtotFijos import main
 
 from numba import njit
 from numpy import zeros, ones, linspace, where, concatenate, ones, arange, delete, amin, amax, pi,format_float_scientific, meshgrid, transpose, arange, transpose,identity,array
