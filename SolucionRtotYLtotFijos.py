@@ -5,12 +5,33 @@ import time
 import matplotlib.pyplot as plt
 
 
-def interpolacion_lineal(d,x): #d es una matriz 2x2 donde al valor d[0][0] le asocia el d[0][1] y al valor d[1][0] le asocia el valor d[1][1]. Esta función devuelve el valor asociado, obtenido por interpolación, para un x tal que d[0][0]<x<d[1][0].
+def interpolacion_lineal(d,x): 
+    """
+    Interpolación lineal para un valor entre dos puntos P_1 y P_2
+    
+    Args:
+        d: Matriz 2x2 con los dos pares de puntos P_1=(x_1=d[0][0],y_1=d[0][1]) y P_2(d[1][0],d[1][1])
+        x: Coordenada x del punto que queremos interpolar. Debe verificar d[0][0]<x<d[1][0]
+    
+    Returns:
+        valor_inteporlado: valor interpolado de P_1 y P_2 en x
+    """
     valor_interpolado=d[0][1]+(x-d[0][0])*((d[1][1]-d[0][1])/(d[1][0]-d[0][0]))  
     return valor_interpolado
 
 @njit
-def epsilon1_nu(tipo_ciclo,T): #Devuelve el valor de epsilon1 y nu en funcion del ciclo usado y la T, que está en unidades T/10**6
+def epsilon1_nu(tipo_ciclo,T): 
+    """
+    Cálculo de los parámetros epsilon1 y nu en función del ciclo usado y la temperatura.
+    
+    Args:
+        tipo_ciclo: Dos posibles valores: 'pp' o 'CNO' en función del mecanismo de generación de energía. Para cualquier otro valor devuelve los parámetros iguales a 0
+        T: Temperatura en unidades 10**6K
+    
+    Returns:
+        epsilon1: Constante para el cálculo de la generación de la energía.  
+        nu: Número entero necesario para el cálculo de la generación de energía 
+    """
     pp=[[4,6,-6.84,6.0],[6,9.5,-6.04,5],[9.5,12,-5.56,4.5],[12,16.5,-5.02,4],[16.5,24,-4.4,3.5]] #Intervalo (T1-T2)/10^6, log_10epsilon1, nu
     cno=[[12,16,-22.2,20],[16,22.5,-19.8,18],[22.5,27.5,-17.1,16],[27.5,36,-15.6,15],[36,50,-12.5,13]]
     epsilon1=0;nu=0
@@ -27,7 +48,20 @@ def epsilon1_nu(tipo_ciclo,T): #Devuelve el valor de epsilon1 y nu en funcion de
     return epsilon1,nu
 
 @njit
-def ritmo_generacion_energia(tipo_ciclo,T,X,Z,rho=1): #Devuelve el ritmo de generacion de E que depende del mecanismo de fusion del hidrogeno, la composicion quimia y la temperatura. T se introduce en unidades de T/10**6
+def ritmo_generacion_energia(tipo_ciclo,T,X,Z,rho=1):
+    """
+    Devuelve el ritmo de generacion de E que depende del mecanismo de fusion del hidrogeno, la composicion química y la temperatura. 
+    
+    Args:
+        tipo_ciclo: Dos posibles valores: 'pp' o 'CNO' en función del mecanismo de generación de energía. Para cualquier otro valor devuelve los parámetros iguales a 0
+        T: Temperatura en K
+        X: Fracción en masa de hidrógeno
+        Z: Metalicidad. Fracción en masa de todo aquello que no es ni hidrógeno ni helio (Z=1-X-Y)
+        rho: Densidad. Por defecto es 1
+    
+    Returns:
+       Valor de epsilón, ritmo de generación de energía, en erg g^1 s^-1
+    """
     if T<4: #Si la T esta fuera de los intervalos asociados a los ciclos CNO y pp entonces la generacion de E es nula
         return 0 
     else:
@@ -39,14 +73,42 @@ def ritmo_generacion_energia(tipo_ciclo,T,X,Z,rho=1): #Devuelve el ritmo de gene
     return epsilon1*X1*X2*rho*T**nu 
 
 @njit
-def error_relativo_absoluto(calculado,estimado,E_relativo_maximo=0.0001): #Devuelve True si el error relativo abs es menor que la cota deseado y False en cc.
+def error_relativo_absoluto(calculado,estimado,E_relativo_maximo=0.0001): 
+    """
+    Calcula si el error relativo absoluto de dos magnitudes es menor que una cota.
+    
+    Args:
+        calculado: Primera magnitud
+        estimado: Segundo magnitud 
+        E_relativo_maximo: Cota. Por defecto 0.0001
+    
+    Returns:
+       True si el error relativo absoluto es menor que E_relativo_maximo y False en caso contrario.
+    """
     if abs(calculado-estimado)/calculado<=E_relativo_maximo:
         return True
     else:   
         return False
 
 @njit
-def ecuacion_19_21(r,P,T,L,M,X,Z,mu): #Calcula f_P, f_T para el caso radiativo en P[i],T[i],L[i],M[i]
+def ecuacion_19_21(r,P,T,L,M,X,Z,mu):
+    """
+    Ecuaciones 19 y 21. Calcula f_P y f_T cuando hay transporte radiativo en la capa i.
+    
+    Args:
+        r: Valor de r en la capa i
+        P: Valor de P en la capa i
+        T: Valor de T en la capa i
+        L: Valor de L en la capa i 
+        M: Valor de M en la capa i
+        X: Fracción en masa de hidrógeno
+        Z: Metalicidad. 
+        mu: Peso molecular medio
+    
+    Returns:
+        f_P: Valor de f_P en la capa i
+        f_T: Valor de f_T en la capa i
+    """
     C_P=8.084*mu
     C_T=0.01679*Z*(1+X)*mu**2
     f_P=-C_P*P*M/(T*r**2)
@@ -54,7 +116,23 @@ def ecuacion_19_21(r,P,T,L,M,X,Z,mu): #Calcula f_P, f_T para el caso radiativo e
     return f_P,f_T
 
 @njit
-def ecuacion_35_36(r,M_total, R_total,L_total,X,Z,mu): #Calculo T y P en las capas exteriores asumiendo transporte radiativo.
+def ecuacion_35_36(r,M_total, R_total,L_total,X,Z,mu):
+    """
+    Ecuaciones 35 y 36. Calcula la T y P en la capa i. Solo es válido para capas exteriores y asume transporte radiativo.
+    
+    Args:
+        r: Valor de r en la capa i
+        M_total: Masa total de la estrella
+        R_total: Radio total de la estrella
+        L_total: Luminosidad total de la estrella
+        X: Fracción en masa de hidrógeno
+        Z: Metalicidad. 
+        mu: Peso molecular medio
+    
+    Returns:
+        P: Valor de P en la capa i
+        T: Valor de T en la capa i
+    """
     A_1=1.9022*mu*M_total
     A_2=10.645*(M_total/(L_total*mu*Z*(1+X)))**(0.5)
     T=A_1*(1/r-1/R_total)
@@ -62,7 +140,30 @@ def ecuacion_35_36(r,M_total, R_total,L_total,X,Z,mu): #Calculo T y P en las cap
     return P,T
 
 @njit
-def ecuacion_43_44_45_46(mu,T_central,r,K,X,Z,j,M,L,T,P): #Cálculo  de M,L,T,P asumiendo transporte convectivo
+def ecuacion_43_44_45_46(mu,T_central,r,K,X,Z,j,M,L,T,P): 
+    """
+    Ecuaciones 43, 44, 45 y 46. Calcula la M, L, T y P en la capa j+1. Válido para las capas centrales asumiendo tranporte convectivo.
+
+    Args:
+        mu: Peso molecular medio
+        T_central: Temperatura en el centro de la estrellas [10**6K]
+        r: Vector equiespaciado del centro a la superficie
+        K: Constante del polítropo
+        X: Fracción en masa de hidrógeno
+        Z: Metalicidad
+        j: Capa-1 en la que queremos calcular las magnitudes
+        M: Valor de M en la capa j
+        L: Valor de L en la capa j
+        T: Valor de T en la capa j
+        P: Valor de P en la capa j
+    
+    Returns:
+        M: Valor de M en la capa j+1
+        L: Valor de L en la capa j+1
+        T: Valor de T en la capa j+1
+        P: Valor de P en la capa j+1
+    """
+    #Cálculo  de M,L,T,P asumiendo transporte convectivo
     #Asumimos transporte convectivo
     X1=X;X2=1/3*Z
     M[j]=0.005077*mu*K*T_central**1.5*r[j]**3
@@ -73,11 +174,35 @@ def ecuacion_43_44_45_46(mu,T_central,r,K,X,Z,j,M,L,T,P): #Cálculo  de M,L,T,P 
     return M,L,T,P
 
 @njit
-def delta1(h,f,i): #Devuelve 1^\Delta_i de la magnitud f
+def delta1(h,f,i): 
+    """
+    Devuelve 1^\Delta_i de la magnitud f (diferencia de primer orden de la derivada primera) en la capa i
+
+    Args:
+        h: Paso de la discretización 
+        f: Magnitud de la que queremos calcular la diferencia
+        i: Capa en la que realizamos el cálculo
+    
+    Returns:
+        Diferencia de primer orden en la capa i de la magnitud f
+    """
+    #
     return h*(f[i]-f[i-1])
 
 @njit
-def delta1y2(h,f,i): #Devuelve 1^\Delta_i y 2^\Delta_i de la magnitud f
+def delta1y2(h,f,i): 
+    """
+    Devuelve 1^\Delta_i y 2^\Delta_i  de la magnitud f (diferencias de primer y segundo orden, respectivamente, de la derivada primera) en la capa i
+
+    Args:
+        h: Paso de la discretización 
+        f: Magnitud de la que queremos calcular la diferencia
+        i: Capa en la que realizamos el cálculo
+    
+    Returns:
+        delta1_i: Diferencia de primer orden en la capa i de la magnitud f
+        delta2_i: Diferencia de segundo orden en la capa i de la magnitud f
+    """
     delta1_i=delta1(h,f,i)
     delta1_i1=delta1(h,f,i-1)
     delta2_i=delta1_i-delta1_i1
@@ -85,6 +210,22 @@ def delta1y2(h,f,i): #Devuelve 1^\Delta_i y 2^\Delta_i de la magnitud f
 
 @njit
 def paso2(h,P,f_P,T,f_T,i):
+    """
+    Paso 2 de los algoritmos. Calcula la presión y temperatura estimada en la capa i+1
+
+    Args:
+        h: Paso de la discretización
+        P: Valor de P en la capa j
+        f_P: Valor de f_P en la capa i 
+        T: Valor de T en la capa j
+        f_T: Valor de f_T en la capa i 
+        i: Capa-1 en la que queremos calcular las magnitudes estimadas
+        
+    
+    Returns:
+        P_i1_est: Presión  estimada en la capa i+1
+        T_i1_est: Temperatura estimada en la capa i+1
+    """
     (delta1_i_P,delta2_i_P)=delta1y2(h,f_P,i)
     P_i1_est=P[i]+h*f_P[i]+1/2*delta1_i_P+5/12*delta2_i_P
     delta1_i_T=delta1(h,f_T,i)
@@ -93,12 +234,42 @@ def paso2(h,P,f_P,T,f_T,i):
 
 @njit
 def paso2bis(K,h,T,f_T,i):
+    """
+    Paso 2bis de los algoritmos. Calcula la temperatura estimada en la capa i+1
+
+    Args:
+        h: Paso de la discretización
+        K: Constante del polítropo       
+        T: Valor de T en la capa j
+        f_T: Valor de f_T en la capa i 
+        i: Capa-1 en la que queremos calcular las magnitudes estimadas
+
+    Returns:
+        T_i1_est: Temperatura estimada en la capa i+1
+    """
     delta1_i=delta1(h,f_T,i)
     T_i1_est=T[i]+h*f_T[i]+1/2*delta1_i
     return T_i1_est
 
 @njit
 def paso3(mu,T_i1_est,P_i1_est,r,i,f_M,h,M):
+    """
+    Paso 3 de los algoritmos. Calcula la "masa calculada" y f_M en la capa i+1.
+
+    Args:
+        mu: Peso molecular medio
+        T_i1_est: Tempratura estimada en la capa i+1
+        P_i1_est: Presión estimada en la capa i+1
+        r: Vector equiespaciado del centro a la superficie
+        i: Capa-1 en la que queremos calcular las magnitudes calculadas       
+        f_M: Valor de f_M en la capa i 
+        h: Paso de la discretización
+        T: Valor de M en la capa i
+
+    Returns:
+        M_i1_cal: Masa calculada en la capa i+1
+        f_M: Valor de f_M en la capa i+1
+    """
     f_M[i+1]=0.01523*mu*P_i1_est*r[i+1]**2/T_i1_est
     delta1_i1_M=delta1(h,f_M,i+1)
     M_i1_cal=M[i]+h*f_M[i+1]-1/2*delta1_i1_M
@@ -106,6 +277,9 @@ def paso3(mu,T_i1_est,P_i1_est,r,i,f_M,h,M):
 
 @njit
 def paso4(h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est):
+    """
+
+    """
     f_P[i+1]=-8.084*mu*P_i1_est*M_i1_cal/(T_i1_est*r[i+1]**2)
     delta1_i1_P=delta1(h,f_P,i+1)
     P_i1_cal=P[i]+h*f_P[i+1]-1/2*delta1_i1_P
