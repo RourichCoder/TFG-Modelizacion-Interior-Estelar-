@@ -1,5 +1,5 @@
-import RadioLuminosidadOptimosYRepresentacion
-from RadioLuminosidadOptimosYRepresentacion import modelo_sin_optimizar_R_y_L, modelo_optimizado_para_X_Y_y_M
+import RtotYLtotOptimosYRepresentacion
+from RtotYLtotOptimosYRepresentacion import modelo_sin_optimizar_R_y_L, modelo_optimizado_para_X_Y_y_M
 import SolucionRtotYLtotFijos
 from SolucionRtotYLtotFijos import epsilon1_nu, ritmo_generacion_energia
 
