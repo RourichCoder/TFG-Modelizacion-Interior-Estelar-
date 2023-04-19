@@ -1,5 +1,5 @@
-import RadioLuminosidadOptimosYRepresentacion
-from RadioLuminosidadOptimosYRepresentacion import modelo_sin_optimizar_R_y_L, modelo_optimizado_para_X_Y_y_M
+import RtotYLtotOptimosYRepresentacion
+from RtotYLtotOptimosYRepresentacion import modelo_sin_optimizar_R_y_L, modelo_optimizado_para_X_Y_y_M
 
 from numba import njit
 from numpy import zeros, ones, linspace, where, concatenate, ones, arange, delete, amin, amax, pi,format_float_scientific, meshgrid, transpose, arange, transpose,identity,array
