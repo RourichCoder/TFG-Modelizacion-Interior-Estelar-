@@ -1,7 +1,7 @@
 import RadioLuminosidadOptimosYRepresentacion
 from RadioLuminosidadOptimosYRepresentacion import modelo_sin_optimizar_R_y_L, modelo_optimizado_para_X_Y_y_M
-import SolucionParaRtotYLtotFijos
-from SolucionParaRtotYLtotFijos import epsilon1_nu, ritmo_generacion_energia
+import SolucionRtotYLtotFijos
+from SolucionRtotYLtotFijos import epsilon1_nu, ritmo_generacion_energia
 
 from numba import njit
 from numpy import zeros, ones, linspace, where, concatenate, ones, arange, delete, amin, amax, pi,format_float_scientific, meshgrid, transpose, arange, transpose, identity, array, log, log10, float64
