@@ -15,7 +15,12 @@ import matplotlib.pyplot as plt
         -Parámetros del mallado
     Return:
         Devuelve distintas gráficas comparando sus estructuras:
-            -
+            -Relación L_total-M_total
+            -Relación R_total-M_total
+            -Relación M_total-T_central
+            -Relación M_total-Densidad_central
+            -Relación Presión-Temperatura
+            -Diagrama HR (Luminosidad-Temperatura efectiva)
 '''
 
 #VARIACIÓN DE LA MASA TOTAL
@@ -33,8 +38,7 @@ R_total=[None]*len(vector_Masa_total);M_total=[None]*len(vector_Masa_total);L_to
 r_down=[None]*len(vector_Masa_total);P=[None]*len(vector_Masa_total);M=[None]*len(vector_Masa_total);L=[None]*len(vector_Masa_total);T=[None]*len(vector_Masa_total);rho=[None]*len(vector_Masa_total)
 
 for i in range(len(vector_Masa_total)):
-    print(vector_Masa_total[i])
-    # print(vector_Valores_iniciales[i][0],vector_Valores_iniciales[i][1],vector_Valores_iniciales[i][2])
+    print('Masa total=',vector_Masa_total[i])
     (R_total[i],M_total[i],L_total[i],T_central[i],r_down[i],P[i],T[i],L[i],M[i],rho[i])=modelo_optimizado_para_X_Y_y_M(vector_Masa_total[i],vector_Valores_iniciales[i][0],vector_Valores_iniciales[i][1],vector_Valores_iniciales[i][2],X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=False,representacion4=False,representacion5=False)
     
 

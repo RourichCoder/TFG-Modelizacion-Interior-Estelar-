@@ -124,7 +124,7 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
     Error_mat=zeros((len(L_vector),len(R_vector)));Tc_mat=zeros((len(L_vector),len(R_vector))) #Mallado
     repeticion=0;temp=10**6
     
-    while repeticion<iteraciones: #Hacemos "iteraciones" mallados, en cada uno con un paso más fino que el anterior
+    while repeticion<iteraciones: #Hacemos "iteraciones" del mallado, en cada uno con un paso más fino que el anterior
         for s in range(len(L_vector)):
             for p in range(len(R_vector)):
                 (E,fase,i,r_down,P,T,L,M,rho,n,T_central,r_frontera,mu,Z,Error_mat[profundidad-s][p],A,B,modelocompleto)=main(M_total,R_vector[p],L_vector[s],T_central,X,Y,capas,it1,aux1,plot1=False)
