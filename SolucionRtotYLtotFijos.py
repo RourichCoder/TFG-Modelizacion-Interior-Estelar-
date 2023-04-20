@@ -820,7 +820,7 @@ def main(M_total,R_total,L_total,T_central,X,Y,capas=100,it1=12,aux1=20,plot1=Fa
         M: Vector con la masa a lo largo de la discretización (de la superficie al centro)
         rho: Vector con la densidad a lo largo de la discretización (de la superficie al centro)
         n: Vector con el parámetro n  a lo largo de la parametrización
-        T_central: Temperatura central de la estrella
+        T_central: Temperatura central de la estrella. Valor que optimiza el modelo
         r_frontera: Radio donde se encuentra la frontera entre el núcleo convectivo y la envoltura radiativa
         mu: Peso molecular medio
         Z: Metalicidad

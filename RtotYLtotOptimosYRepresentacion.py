@@ -9,10 +9,35 @@ import matplotlib.pyplot as plt
 
 #PARA R_TOTAL Y L_TOTAL PREDETERMINADOS----------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------------
-def modelo_sin_optimizar_R_y_L(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,plot1=False):
+def modelo_sin_optimizar_R_y_L(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,plot1=False,plot2=False):
+    """
+    Resuelve la estructura de la estrella, manteniendo el radio total y la luminosidad total fijos, a partir del código en "SolucionRtotYLtotFijos.py" y representa los resultados gráficamente y con tablas.
+    Args:
+        M_total: Masa total de la estrella. Valor característico de la estrella
+        R_total: Radio total de la estrella. Valor inicial
+        L_total: Luminosidad total de la estrella. Valor inicial
+        T_central: Temperatura central de la estrella. Valor inicial
+        X: Fracción en masa de hidrógeno. Valor característico de la estrella
+        Y: Fracción en masa de helio. Valor característico de la estrella
+        capas: Número de divisiones de la discretización. Por defecto 100
+        it1: Número de iteraciones acotando el intervalo de la temperatura central centrándo cada nuevo intervalo en la que menor error relativo total obtuvo en la anterior iteración. Por defecto 12
+        aux1: Número de divisiones del intervalo donde se busca la temperatura óptima .Por defecto 20
+        plot1=False: Variable booleana. Si es True devuelve la gráfica del error total en función de la temperatura central. Por defecto False
+        plot2=False: Variable booleana. Si es True devuelve la gráfica de las magnitudes físicas (presión, temperatura, luminosidad, masas y densidad) normalizadas en función del radio. Por defecto False
+        
+    Returns:
+        La función no devuelve ninguna variable. Sin embargo, devuelve los resultados en forma de tabla siguiendo el siguiente orden:
+            -Integración desde la superficie: [Primeras 3 capas externas - Fase A.1. - Fase A.2 - Parámertros inteporlados en la frontera]
+            -La temperatura central óptima para el R_total y L_total y el error asociado entre las soluciones al integrar desde la superficie y desde el centro con esa temperatura central
+            -Integración desde el centro: [Primeras 3 capas internas - Fase A.2. (hasta la frontera del núcleo) - Parámertros inteporlados en la frontera (requiere calcular una capa extra en la envoltura)]
+            -Errores relativos entre las soluciones down y up
+            -Tabla del modelo completo (unión de las soluciones down y up y concatenación de las capas desde 0.9R_total a R_total)
+        Adicionalmente, 
+            -Si plot1=True: Representa el error total en función de la temperatura central
+            -Si plot2=True: Representa la gráfica de las magnitudes físicas (presión, temperatura, luminosidad, masas y densidad) normalizadas en función del radio
+    """
     (E,fase,i,r_down,P,T,L,M,rho,n,T_central,r_frontera,mu,Z,Error,A,B,modelocompleto)=main(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,plot1)
-    
-    #PRINT DEL MODELO--------------------------------------------------------------------------------------------------------------------------
+
     print('-'*110);print('-'*110);print(' '*22,'INTEGRACION DESDE LA SUPERFICIE');print('-'*110);print('-'*110)
     for s in range(len(A[0])):
         print(A[0][s])
@@ -27,21 +52,68 @@ def modelo_sin_optimizar_R_y_L(M_total,R_total,L_total,T_central,X,Y,capas,it1,a
     print(tabulate(modelocompleto, headers='firstrow', tablefmt='fancy_grid',stralign="left",floatfmt='.7f'))
     print('El error total de este modelo es',"{0:.4f}".format(Error));print('-'*110)
     
-    # print(tabulate(modelocompleto,headers='firstrow',tablefmt='latex',stralign='center',floatfmt='.7f'))
-    
-    # P_norm=P/amax(P);T_norm=T/amax(T); L_norm=L/amax(L); M_norm=M/amax(M);rho_norm=rho/amax(rho)
-    # plt.figure()
-    # p1,p2,p3,p4,p5=plt.plot(r_down,P_norm,r_down,T_norm,r_down,L_norm,r_down,M_norm,r_down,rho_norm)
-    # plt.title('Magnitudes normalizadas para M='+str("{0:.3f}".format(M_total)),fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10)
-    # plt.xlabel('Radio '+r'$(10^{10} cm)$')
-    # plt.ylabel('Magnitudes físicas normalizadas')
-    # plt.legend(['Presión','Temperatura','Luminosidad','Masa','Densidad'])        
+    if plot2==True:
+        P_norm=P/amax(P);T_norm=T/amax(T); L_norm=L/amax(L); M_norm=M/amax(M);rho_norm=rho/amax(rho)
+        plt.figure()
+        p1,p2,p3,p4,p5=plt.plot(r_down,P_norm,r_down,T_norm,r_down,L_norm,r_down,M_norm,r_down,rho_norm)
+        plt.title('Magnitudes normalizadas para M='+str("{0:.3f}".format(M_total)),fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10)
+        plt.xlabel('Radio '+r'$(10^{10} cm)$')
+        plt.ylabel('Magnitudes físicas normalizadas')
+        plt.legend(['Presión','Temperatura','Luminosidad','Masa','Densidad'])        
+        
+#Para exportar la tabla "modelo completo" a latex: print(tabulate(modelocompleto,headers='firstrow',tablefmt='latex',stralign='center',floatfmt='.7f'))
+
 
 
 #PARA R_TOTAL Y L_TOTAL QUE OPTIMIZAN EL MODELO----------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------------
-def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1,representacion2,representacion3,representacion4,representacion5): 
-    deltaR=0.1; deltaL=1; profundidad=12 #Paso inicial. Profundidad debe ser PAR, pues es  la suma de casillas a derecha e izquierda
+def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1,representacion2,representacion3,representacion4,representacion5,deltaR=0.1,deltaL=1,profundidad=12): 
+    """
+    Resuelve la estructura de la estrella hallando el radio total y la luminosidad total óptimos a partir del código en "SolucionRtotYLtotFijos.py" y representa los resultados gráficamente y con tablas.
+    Args:
+        M_total: Masa total de la estrella. Valor característico de la estrella
+        R_total: Radio total de la estrella. Valor inicial
+        L_total: Luminosidad total de la estrella. Valor inicial
+        T_central: Temperatura central de la estrella. Valor inicial
+        X: Fracción en masa de hidrógeno. Valor característico de la estrella
+        Y: Fracción en masa de helio. Valor característico de la estrella
+        capas: Número de divisiones de la discretización. Por defecto 100
+        it1: Número de iteraciones acotando el intervalo de la temperatura central centrándo cada nuevo intervalo en la que menor error relativo total obtuvo en la anterior iteración. Por defecto 12
+        aux1: Número de divisiones del intervalo donde se busca la temperatura óptima .Por defecto 20
+        iteraciones: Número de veces que se refina el mallado para hallar el radio total y la luminosidad total óptimos
+        representacion1: Variable booleana. Si es True devuelve la gráfica del mallado del error total en función de las luminosidad y radios totales en cada iteración (tantas gráficas como iteraciones)
+        Representación2: Variable booleana. Si es True devuelve la gráfica del mallado de la temperatura central óptima en función de las luminosidad y radios totales en cada iteración (tantas gráficas como iteraciones)
+        Representación3: Variable booleana. Si es True devuelve las tablas del modelo que optimiza el error
+        Representación4: Variable booleana. Si es True devuelve la gráfica de las magnitudes física en función del radio (un plot para cada magnitud, por lo que devuelve 5 gráficas)
+        Representación5: Variable booleana. Si es True devuelve la gráfica de todas las magnitudes físicas normalizadas (una única gráfica)
+        deltaR: Paso del radio en el mallado para hallar el radio total y la luminosidad total óptimos. Por defecto 0.1
+        deltaL: Paso de la luminosidad en el mallado para hallar el radio total y la luminosidad total óptimos. Por defecto 1
+        profundidad: Entero par (pues es  la suma de casillas a derecha e izquierda del mallado). 
+        
+    Returns:
+        M_total: Masa total de la estrella. Valor característico de la estrella
+        R_total: Radio total de la estrella. Valor que optimiza el modelo
+        L_total: Luminosidad total de la estrella. Valor que optimiza el modelo
+        T_central: Temperatura central de la estrella. Valor que optimiza el modelo
+        r_down: Vector con el radio en cada capa de la discretización (de la superficie al centro)
+        P: Vector con la presión a lo largo de la discretización (de la superficie al centro)
+        T: Vector con la temperatura a lo largo de la discretización (de la superficie al centro)
+        L: Vector con la luminosidad a lo largo de la discretización (de la superficie al centro)
+        M: Vector con la masa a lo largo de la discretización (de la superficie al centro)
+        rho: Vector con la densidad a lo largo de la discretización (de la superficie al centro)
+    
+        Además de volver las anteriores variables y las gráficas en función de los valores de las variables booleanas de entradas. Si la variable booleana "Representación3" es True entonces devuelve la siguiente tabla:
+            En cada iteración (cada vez que hacemos el mallado de R y L):
+            -Devuelve la luminosidad total, el radio total y la temperatura central y su error total asociado
+            Para la última iteración (que será la de menor error):
+            -Integración desde la superficie: [Primeras 3 capas externas - Fase A.1. - Fase A.2 - Parámertros inteporlados en la frontera]
+            -La temperatura central óptima para el R_total y L_total y el error asociado entre las soluciones al integrar desde la superficie y desde el centro con esa temperatura central
+            -Integración desde el centro: [Primeras 3 capas internas - Fase A.2. (hasta la frontera del núcleo) - Parámertros inteporlados en la frontera (requiere calcular una capa extra en la envoltura)]
+            -Errores relativos entre las soluciones down y up
+            -Tabla del modelo completo (unión de las soluciones down y up y concatenación de las capas desde 0.9R_total a R_total)
+    """
+    #RESOLUCIÓN DE LA ESTRELLA VARIANDO R_total Y L_total--------------------------------------------------------------------------------------------------------
+    deltaR=0.1; deltaL=1; profundidad=12 
     
     R_vector=[R_total];L_vector=[L_total]
     for r in range(profundidad//2):
@@ -62,7 +134,6 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
                     L_totalsave=L_vector[s]; R_totalsave=R_vector[p]; T_centralsave=T_central
                     temp=Error_mat[profundidad-s][p] #Actualizamos el nuevo mejor error conseguido
                     mejora=True
-    
         Err_total=temp
         R_total=R_totalsave; L_total=L_totalsave;  #Los nuevos Rtotal y Ltotal corresponden al menor error del mallado
         
@@ -144,5 +215,4 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
     M_total=M[0];L_total=L[0]
     return (R_total,M_total,L_total,T_central,r_down,P,T,L,M,rho)
     
-#Para exportar la tabla a latex: print(tabulate(modelocompleto,headers='firstrow',tablefmt='latex',stralign='center',floatfmt='.7f'))
-#0.04
+#Para exportar la tabla "modelo completo" a latex: print(tabulate(modelocompleto,headers='firstrow',tablefmt='latex',stralign='center',floatfmt='.7f'))

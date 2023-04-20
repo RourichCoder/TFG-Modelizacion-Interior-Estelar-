@@ -7,22 +7,20 @@ from tabulate import tabulate
 import time
 import matplotlib.pyplot as plt
 
+'''Resuelve la estructura de 20 estrellas con la misma composición química, pero distintas masas.
 
-
-#plot1= Plot del error total en función de la temperatura central para un R y L totales fijos
-#Representación1= Plot del mallado del error total en función de las luminosidad y radios totales 
-#Representación2= Plot del mallado de la temperatura central óptima en función de las luminosidad y radios totales 
-#Representación3= Tablas del modelo que optimiza el error
-#Representación4= Plot de las magnitudes física en función del radio (un plot para cada magnitud)
-#Representación5= Plot de todas las magnitudes físicas normalizadas (en un único plot)
-#datos= Devuelve los valores R_total,M_total,L_total,T_central,r_down,M,L,T,rho
-
+    Args:
+        -Parametros característicos de cada estrella
+        -Valores iniciales de cada estrella
+        -Parámetros del mallado
+    Return:
+        Devuelve distintas gráficas comparando sus estructuras:
+            -
+'''
 
 #VARIACIÓN DE LA MASA TOTAL
-X=0.75;Y=0.20;Z=1-X-Y; #Mantenemos constante la composición química
-capas=100;it1=10;aux1=10;it2=6;aux2=8 #Parametros del mallado
-iteraciones=4
-mu=1/(2*X+0.75*Y+0.5*Z);
+X=0.75;Y=0.20;Z=1-X-Y;mu=1/(2*X+0.75*Y+0.5*Z) #Mantenemos constante la composición química
+capas=100;it1=10;aux1=10;iteraciones=4 #Parametros del mallado
 
 vector_Masa_total=[13,12.5,12,11.5,11,10.5,10,9.5,9,8.5,8,7.5,7,6.5,6,5.5,5,4.5,4,3.5]
 vector_Valores_iniciales=[[23.3,6590,2.48],[20.8,4750,2.4],[20.5,3900,2.4],[20,3020,2.4],[19.8,2425,2.32],[19,1890,2.3],[18.5,1480,2.3],[17.5,1150,2.2],[17,840,2.2],[16,600,2.1],[15.5,460,2.1],[14.5,325,2.1],[14,230,2.1],[14,155,2.2],[14,95.0,2],[14,70.0,1.8],[12,40.0,1.5],[12, 40.0, 1.5],[10,30,1.5],[9.5, 22, 1.5]]
