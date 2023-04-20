@@ -828,6 +828,7 @@ def main(M_total,R_total,L_total,T_central,X,Y,capas=100,it1=12,aux1=20,plot1=Fa
         A: Recopilación de los resultados para su representación en tabla de la integración desde la superficie. 
         B: Recopilación de los resultados para su representación en tabla de la integración desde el núcleo.
         modelocompleto: Recopilación de los resultados finales (una vez pegadas las dos soluciones y añadidas las capas desde 0.9R_total hasta R_total) para su representación en tabla
+        M_frontera: Masa del núcleo convectivo
     """
     Z=1-X-Y 
     mu=1/(2*X+0.75*Y+0.5*Z) 
@@ -994,6 +995,6 @@ def main(M_total,R_total,L_total,T_central,X,Y,capas=100,it1=12,aux1=20,plot1=Fa
     for s in range(0,capas+capas_previas+1):
         modelocompleto+=[[E[s],fase[s],str(i[s]),r_down[s],P[s],T[s],L[s],M[s],rho_107[s],n[s]]]
     B=[['Primeras 3 capas internas:','Capas posteriores hasta la frontera del núcleo:','Salimos del núcleo. Calculamos una capa adicional suponiendo convectivo:','Parámetros físicos interpolados en la frontera entre el núcleo y la envoltura:','Errores relativos entre las soluciones down y up (%):'],[primeras3capasinternas,faseA2interna,capaadicional,frontera_nucleo_envoltura,errorrelativodownup]]
-    return E,fase,i,r_down,P,T,L,M,rho,n,T_central,r_frontera,mu,Z,Error,A,B,modelocompleto
+    return E,fase,i,r_down,P,T,L,M,rho,n,T_central,r_frontera,mu,Z,Error,A,B,modelocompleto, M_frontera_down
 #------------------------------------------------------------------------------------------------------------------------------------    
 #------------------------------------------------------------------------------------------------------------------------------------

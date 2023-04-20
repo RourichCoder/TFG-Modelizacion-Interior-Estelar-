@@ -30,12 +30,12 @@ capas=100;it1=10;aux1=10;iteraciones=4 #Parametros del mallado
 #MODELO MASA alta (~11.3 M_sun)
 M_total=22.5 #Parámetro característico de la estrella
 R_total=33; L_total=102000 ; T_central=2.9 #Valores iniciales
-(R_total_alta,M_total_alta,L_total_alta,T_central_alta,r_down_alta,P_alta,T_alta,L_alta,M_alta,rho_alta)=modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=True,representacion4=False,representacion5=True)
+(R_total_alta,M_total_alta,L_total_alta,T_central_alta,r_down_alta,P_alta,T_alta,L_alta,M_alta,rho_alta,M_frontera_alta)=modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=True,representacion4=False,representacion5=True)
 
 #MODELO MASA baja (~1.75 M_sun)
 M_total=3.5 #Parámetro característico de la estrella
 R_total=9.5; L_total=22; T_central=1.5; #Valores iniciales
-(R_total_baja,M_total_baja,L_total_baja,T_central_baja,r_down_baja,P_baja,T_baja,L_baja,M_baja,rho_baja)=modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=False,representacion4=False,representacion5=True)
+(R_total_baja,M_total_baja,L_total_baja,T_central_baja,r_down_baja,P_baja,T_baja,L_baja,M_baja,rho_baja,M_frontera_baja)=modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=False,representacion4=False,representacion5=True)
 
 
 r_down_norm_alta=r_down_alta/R_total_alta

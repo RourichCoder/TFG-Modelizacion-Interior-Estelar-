@@ -36,7 +36,7 @@ def modelo_sin_optimizar_R_y_L(M_total,R_total,L_total,T_central,X,Y,capas,it1,a
             -Si plot1=True: Representa el error total en función de la temperatura central
             -Si plot2=True: Representa la gráfica de las magnitudes físicas (presión, temperatura, luminosidad, masas y densidad) normalizadas en función del radio
     """
-    (E,fase,i,r_down,P,T,L,M,rho,n,T_central,r_frontera,mu,Z,Error,A,B,modelocompleto)=main(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,plot1)
+    (E,fase,i,r_down,P,T,L,M,rho,n,T_central,r_frontera,mu,Z,Error,A,B,modelocompleto,M_frontera)=main(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,plot1)
 
     print('-'*110);print('-'*110);print(' '*22,'INTEGRACION DESDE LA SUPERFICIE');print('-'*110);print('-'*110)
     for s in range(len(A[0])):
@@ -101,7 +101,8 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
         L: Vector con la luminosidad a lo largo de la discretización (de la superficie al centro)
         M: Vector con la masa a lo largo de la discretización (de la superficie al centro)
         rho: Vector con la densidad a lo largo de la discretización (de la superficie al centro)
-    
+        M_frontera: Masa del núcleo convectivo
+        
         Además de volver las anteriores variables y las gráficas en función de los valores de las variables booleanas de entradas. Si la variable booleana "Representación3" es True entonces devuelve la siguiente tabla:
             En cada iteración (cada vez que hacemos el mallado de R y L):
             -Devuelve la luminosidad total, el radio total y la temperatura central y su error total asociado
@@ -111,6 +112,7 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
             -Integración desde el centro: [Primeras 3 capas internas - Fase A.2. (hasta la frontera del núcleo) - Parámertros inteporlados en la frontera (requiere calcular una capa extra en la envoltura)]
             -Errores relativos entre las soluciones down y up
             -Tabla del modelo completo (unión de las soluciones down y up y concatenación de las capas desde 0.9R_total a R_total)
+            
     """
     #RESOLUCIÓN DE LA ESTRELLA VARIANDO R_total Y L_total--------------------------------------------------------------------------------------------------------
     deltaR=0.1; deltaL=1; profundidad=12 
@@ -122,12 +124,12 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
     R_vector=array(R_vector); L_vector=array(L_vector)
         
     Error_mat=zeros((len(L_vector),len(R_vector)));Tc_mat=zeros((len(L_vector),len(R_vector))) #Mallado
-    repeticion=0;temp=10**6
+    repeticion=0;temp=10**6;x=0
     
     while repeticion<iteraciones: #Hacemos "iteraciones" del mallado, en cada uno con un paso más fino que el anterior
         for s in range(len(L_vector)):
             for p in range(len(R_vector)):
-                (E,fase,i,r_down,P,T,L,M,rho,n,T_central,r_frontera,mu,Z,Error_mat[profundidad-s][p],A,B,modelocompleto)=main(M_total,R_vector[p],L_vector[s],T_central,X,Y,capas,it1,aux1,plot1=False)
+                (E,fase,i,r_down,P,T,L,M,rho,n,T_central,r_frontera,mu,Z,Error_mat[profundidad-s][p],A,B,modelocompleto,M_frontera)=main(M_total,R_vector[p],L_vector[s],T_central,X,Y,capas,it1,aux1,plot1=False)
                 Tc_mat[profundidad-s][p]=T_central
                 if Error_mat[profundidad-s][p]<temp: #Guardamos temporalmente el mejor resultado
                     r_downsave=r_down;Psave=P;Tsave=T;Lsave=L;Msave=M;rhosave=rho;Asave=A;Bsave=B;modelocompletosave=modelocompleto;r_fronterasave=r_frontera
@@ -140,6 +142,8 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
         if mejora and representacion1:
             plt.figure(figsize=(32,22));
             plt.pcolormesh(R_vector,L_vector[::-1],Error_mat,cmap='viridis')
+            if x<2: #En las primeras iteraciones fijamos el intervalo del colorbar, para que los valores que diverjan no saturen el gráfic
+                plt.clim(0, 60)
             cbar = plt.colorbar()
             cbar.ax.tick_params(labelsize=25)
             plt.tick_params(axis='both', labelsize=35)
@@ -148,6 +152,7 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
             plt.title('Error total',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold','size': 48})
             plt.scatter(R_total,L_total,color='red')
             plt.show()
+            x+=1
             
             if representacion2:
                 plt.figure(figsize=(32,22));
@@ -213,6 +218,6 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
         plt.ylabel('Magnitudes físicas normalizadas')
         plt.legend(['Presión','Temperatura','Luminosidad','Masa','Densidad'])
     M_total=M[0];L_total=L[0]
-    return (R_total,M_total,L_total,T_central,r_down,P,T,L,M,rho)
-    
+    return (R_total,M_total,L_total,T_central,r_down,P,T,L,M,rho,M_frontera)
+
 #Para exportar la tabla "modelo completo" a latex: print(tabulate(modelocompleto,headers='firstrow',tablefmt='latex',stralign='center',floatfmt='.7f'))
