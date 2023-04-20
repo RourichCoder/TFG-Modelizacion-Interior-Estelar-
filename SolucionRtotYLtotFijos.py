@@ -106,8 +106,8 @@ def ecuacion_19_21(r,P,T,L,M,X,Z,mu):
         mu: Peso molecular medio
     
     Returns:
-        f_P: Valor de f_P en la capa i
-        f_T: Valor de f_T en la capa i
+        f_P: Valor de dP/dr en la capa i
+        f_T: Valor de dT/dr en la capa i
     """
     C_P=8.084*mu
     C_T=0.01679*Z*(1+X)*mu**2
@@ -147,7 +147,7 @@ def ecuacion_43_44_45_46(mu,T_central,r,K,X,Z,j,M,L,T,P):
     Args:
         mu: Peso molecular medio
         T_central: Temperatura en el centro de la estrellas [10**6K]
-        r: Vector equiespaciado del centro a la superficie
+        r: Vector equiespaciado de la superficie al centro
         K: Constante del polítropo
         X: Fracción en masa de hidrógeno
         Z: Metalicidad
@@ -216,9 +216,9 @@ def paso2(h,P,f_P,T,f_T,i):
     Args:
         h: Paso de la discretización
         P: Valor de P en la capa j
-        f_P: Valor de f_P en la capa i 
+        f_P: Vector con el valor de dP/dr a lo largo de la discretización
         T: Valor de T en la capa j
-        f_T: Valor de f_T en la capa i 
+        f_T: Vector con el valor de dT/dr a lo largo de la discretización
         i: Capa-1 en la que queremos calcular las magnitudes estimadas
         
     
@@ -241,7 +241,7 @@ def paso2bis(K,h,T,f_T,i):
         h: Paso de la discretización
         K: Constante del polítropo       
         T: Valor de T en la capa j
-        f_T: Valor de f_T en la capa i 
+        f_T: Vector con el valor de dT/dr a lo largo de la discretización
         i: Capa-1 en la que queremos calcular las magnitudes estimadas
 
     Returns:
@@ -260,15 +260,15 @@ def paso3(mu,T_i1_est,P_i1_est,r,i,f_M,h,M):
         mu: Peso molecular medio
         T_i1_est: Tempratura estimada en la capa i+1
         P_i1_est: Presión estimada en la capa i+1
-        r: Vector equiespaciado del centro a la superficie
+        r: Vector equiespaciado de la superficie al centro
         i: Capa-1 en la que queremos calcular las magnitudes calculadas       
-        f_M: Valor de f_M en la capa i 
+        f_M: Vector con el valor de dM/dr a lo largo de la discretización
         h: Paso de la discretización
         T: Valor de M en la capa i
 
     Returns:
         M_i1_cal: Masa calculada en la capa i+1
-        f_M: Valor de f_M en la capa i+1
+        f_M: Valor de dM/dr en la capa i+1
     """
     f_M[i+1]=0.01523*mu*P_i1_est*r[i+1]**2/T_i1_est
     delta1_i1_M=delta1(h,f_M,i+1)
@@ -278,7 +278,23 @@ def paso3(mu,T_i1_est,P_i1_est,r,i,f_M,h,M):
 @njit
 def paso4(h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est):
     """
+    Paso 4 de los algoritmos. Calcula la "presión calculada" y f_P en la capa i+1.
 
+    Args:
+        h: Paso de la discretización
+        mu: Peso molecular medio
+        M_i1_est: Masa estimada en la capa i+1
+        r: Vector equiespaciado de la superficie al centro
+        i: Capa-1 en la que queremos calcular las magnitudes calculadas       
+        P: Vector con la presión a lo largo de la discretización
+
+        P_i1_est: Presión estimada en la capa i+1
+        f_P: Vector con el valor de dP/dr a lo largo de la discretización
+        T_i1_est: Tempratura estimada en la capa i+1
+        
+    Returns:
+        P_i1_cal: Presión calculada en la capa i+1
+        f_P: Valor de dP/dr en la capa i+1
     """
     f_P[i+1]=-8.084*mu*P_i1_est*M_i1_cal/(T_i1_est*r[i+1]**2)
     delta1_i1_P=delta1(h,f_P,i+1)
@@ -287,7 +303,28 @@ def paso4(h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est):
 
 @njit
 def paso5(P_i1_cal,h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est,f_M,M):
-    while not error_relativo_absoluto(P_i1_cal,P_i1_est): #Repetimos la fase 3
+    """
+    Paso 5 de los algoritmos. Realiza el "loop 3" (repetir paso 3 y paso 4) hasta que la presión calculada y estimada en la capa i+1 difieran menos del error relativo absoluto maximo.
+
+    Args:
+        P_i1_cal: Presión calculada en la capa i+1
+        h: Paso de la discretización
+        mu: Peso molecular medio
+        M_i1_cal: Masa calculada en la capa i+1
+        r: Vector equiespaciado de la superficie al centro
+        i: Capa-1 en la que queremos calcular las magnitudes calculadas       
+        P: Vector con la presión a lo largo de la discretización
+        P_i1_est: Presión estimada en la capa i+1
+        f_P: Vector con el valor de dP/dr a lo largo de la discretización
+        T_i1_est: Tempratura estimada en la capa i+1
+        f_M: Vector con el valor de dM/dr a lo largo de la discretización
+        M: Vector con la masa a lo largo de la discretización
+
+    Returns:
+        P_i1_cal: Presión calculada en la capa i+1
+        f_P: Valor de dP/dr en la capa i+1
+    """
+    while not error_relativo_absoluto(P_i1_cal,P_i1_est):
         P_i1_est=P_i1_cal
         (M_i1_cal,f_M)=paso3(mu,T_i1_est,P_i1_est,r,i,f_M,h,M)
         (P_i1_cal,f_P)=paso4(h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est)
@@ -295,6 +332,25 @@ def paso5(P_i1_cal,h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est,f_M,M):
 
 @njit
 def paso6(T_i1_est,P_i1_cal,L,f_L,h,i,r,mu,X,Z):
+    """
+    Paso 6 de los algoritmos. Calcula la "luminosidad calculada" y f_L en la capa i+1
+
+    Args:
+        T_i1_est: Tempratura estimada en la capa i+1
+        P_i1_cal: Presión calculada en la capa i+1
+        L: Vector con la luminosidad a lo largo de la discretización
+        f_L: Vector con el valor de dL/dr a lo largo de la discretización
+        h: Paso de la discretización
+        i: Capa-1 en la que queremos calcular las magnitudes calculadas       
+        r: Vector equiespaciado de la superficie al centro
+        mu: Peso molecular medio
+        X: Fracción en masa de hidrógeno
+        Z: Metalicidad
+        
+    Returns:
+        L_i1_cal: Luminosidad calculada en la capa i+1
+        f_L: Valor de dL/dr en la capa i+1
+    """
     #Para hallar epsilon1,mu,nu,X1 y X2 tenemos que estudiar el tipo de ciclo. Para ello simplemente vemos cual genera más energía.
     #En este caso podemos asegurar que hay generación de energía pues T>4x10**6
     if ritmo_generacion_energia('pp',T_i1_est*10,X,Z)>=ritmo_generacion_energia('CNO',T_i1_est*10,X,Z): #Domina el ciclo pp
@@ -310,6 +366,26 @@ def paso6(T_i1_est,P_i1_cal,L,f_L,h,i,r,mu,X,Z):
 
 @njit
 def paso7(h,X,Z,mu,L_i1_cal,i,P_i1_cal,T_i1_est,r,T,f_T):
+    """
+    Paso 7 de los algoritmos. Calcula la "temperatura calculada" y f_T en la capa i+1
+
+    Args:
+        h: Paso de la discretización
+        X: Fracción en masa de hidrógeno
+        Z: Metalicidad
+        mu: Peso molecular medio
+        L_i1_cal: Luminosidad calculada en la capa i+1
+        i: Capa-1 en la que queremos calcular las magnitudes calculadas       
+        P_i1_cal: Presión calculada en la capa i+1
+        T_i1_est: Tempratura estimada en la capa i+1
+        r: Vector equiespaciado de la superficie al centro
+        T: Vector con la temperatura a lo largo de la discretización
+        f_T: Vector con el valor de dT/dr a lo largo de la discretización    
+        
+    Returns:
+        T_i1_cal: Temperatura calculada en la capa i+1
+        f_T: Valor de dT/dr en la capa i+1
+    """
     f_T[i+1]=-0.01679*Z*(1+X)*mu**2*P_i1_cal**2*L_i1_cal/(T_i1_est**8.5*r[i+1]**2)
     delta1_i1_T=delta1(h,f_T,i+1)
     T_i1_cal=T[i]+h*f_T[i+1]-1/2*delta1_i1_T
@@ -317,6 +393,23 @@ def paso7(h,X,Z,mu,L_i1_cal,i,P_i1_cal,T_i1_est,r,T,f_T):
 
 @njit
 def paso7bis(r,h,mu,i,T,T_i1_est,f_T,M_i1_cal):
+    """
+    Paso 7bis de los algoritmos. Calcula la "temperatura calculada" y f_T en la capa i+1. 
+
+    Args:
+        r: Vector equiespaciado de la superficie al centro
+        h: Paso de la discretización
+        mu: Peso molecular medio
+        i: Capa-1 en la que queremos calcular las magnitudes calculadas       
+        T: Vector con la temperatura a lo largo de la discretización
+        T_i1_est: Temperatura estimada en la capa i+1
+        f_T: Vector con el valor de dT/dr a lo largo de la discretización    
+        M_i1_cal: Masa calculada en la capa i+1
+             
+    Returns:
+        T_i1_cal: Temperatura calculada en la capa i+1
+        f_T: Valor de dT/dr en la capa i+1
+    """
     if r[i+1]==0: #En el centro
         T_i1_cal=T_i1_est
         f_T[i+1]=0
@@ -328,6 +421,34 @@ def paso7bis(r,h,mu,i,T,T_i1_est,f_T,M_i1_cal):
 
 @njit
 def paso8(T_i1_cal,P_i1_cal,h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est,Z,T,f_T,M,f_M,L,f_L,X):
+    """
+    Paso 8 de los algoritmos. Realiza el "loop 2" (repetir el "loop 3" y los pasos 6 y 7) hasta que la temperatura calculada y estimada en la capa i+1 difieran menos del error relativo absoluto maximo.
+
+    Args:
+        T_i1_cal: Temperatura calculada en la capa i+1
+        P_i1_cal: Presión calculada en la capa i+1
+        h: Paso de la discretización
+        mu: Peso molecular medio
+        M_i1_cal: Masa calculada en la capa i+1
+        r: Vector equiespaciado de la superficie al centro
+        i: Capa-1 en la que queremos calcular las magnitudes
+        P: Vector con la presión a lo largo de la discretización
+        P_i1_est: Presión estimada en la capa i+1
+        f_P: Vector con el valor de dP/dr a lo largo de la discretización    
+        T_i1_est: Temperatura estimada en la capa i+1
+        Z: Metalicidad
+        T: Vector con la temperatura a lo largo de la discretización
+        f_T: Vector con el valor de dT/dr a lo largo de la discretización    
+        M: Vector con la masa a lo largo de la discretización
+        f_M: Vector con el valor de dM/dr a lo largo de la discretización    
+        L: Vector con la luminosidad a lo largo de la discretización
+        f_L: Vector con el valor de dL/dr a lo largo de la discretización    
+        X: Fracción en masa de hidrógeno
+             
+    Returns:
+        T_i1_cal: Temperatura calculada en la capa i+1
+        f_T: Valor de dT/dr en la capa i+1
+    """
     while not error_relativo_absoluto(T_i1_cal, T_i1_est): #Repetimos las fases 3, 4, 5, 6 y 7
         T_i1_est=T_i1_cal
         (M_i1_cal,f_M)=paso3(mu,T_i1_est,P_i1_est,r,i,f_M,h,M)
@@ -338,6 +459,26 @@ def paso8(T_i1_cal,P_i1_cal,h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est,Z,T,f_T,M,
     return T_i1_cal,f_T
 
 def paso8bis(K,T_i1_est,mu,r,i,f_M,h,M,T,f_T,T_i1_cal):
+    """
+    Paso 8bis de los algoritmos. Realiza el "loop 2" (repetir "polítropo" y los pasos 3 y 7bis) hasta que la temperatura calculada y estimada en la capa i+1 difieran menos del error relativo absoluto maximo.
+
+    Args:
+        K: Constante del polítropo
+        T_i1_est: Temperatura estimada en la capa i+1
+        mu: Peso molecular medio
+        r: Vector equiespaciado de la superficie al centro
+        i: Capa-1 en la que queremos calcular las magnitudes ca
+        f_M: Vector con el valor de dM/dr a lo largo de la discretización    
+        h: Paso de la discretización
+        M: Vector con la masa a lo largo de la discretización
+        T: Vector con la temperatura a lo largo de la discretización
+        f_T: Vector con el valor de dT/dr a lo largo de la discretización    
+        T_i1_cal: Temperatura calculada en la capa i+1
+             
+    Returns:
+        T_i1_cal: Temperatura calculada en la capa i+1
+        f_T: Valor de dT/dr en la capa i+1
+    """
     while not error_relativo_absoluto(T_i1_cal,T_i1_est): #Repetimos polítropo y las fases 3 y 7bis
         T_i1_est=T_i1_cal
         P_i1_est=politropo(K,T_i1_est)
@@ -347,24 +488,90 @@ def paso8bis(K,T_i1_est,mu,r,i,f_M,h,M,T,f_T,T_i1_cal):
 
 @njit
 def paso9(T_i1_cal,P_i1_cal,f_P,f_T,i):
+    """
+    Paso 9 de los algoritmos. Calcula el valor de n (parámetro esencial para ver cuando domina el tranporte convectivo)
+
+    Args:
+        T_i1_cal: Temperatura calculada en la capa i+1
+        P_i1_cal: Presión calculada en la capa i+1
+        f_P: Vector con el valor de dP/dr a lo largo de la discretización    
+        f_T: Vector con el valor de dT/dr a lo largo de la discretización    
+        i: Capa-1 en la que queremos calcular las magnitudes ca
+             
+    Returns:
+        n: Parámetro n
+    """
     n=(T_i1_cal/P_i1_cal)*(f_P[i+1]/f_T[i+1])-1
     return n
 
 def paso10(n,i):
+    """
+    Paso 10 de los algoritmos. Comprueba si el valor de n+1 es menor o igual que 2.5. 
+    En caso afirmativo, sigue siendo válido el transporte radiativo y los resultados de la capa i+1
+    son válidos. 
+
+    Args:
+        n: Parámetro n
+        i: Capa-1 en la que queremos calcular las magnitudes ca
+             
+    Returns:
+        Fase_A1: Variable booleana. True indica que continua la fase radiativa y los valores hallados en la capa i+1 son válidos. False indica que el transporte es convectivo y desecha los cálculos en la fase i+1.
+    """
     if n[i+1]+1<=2.5:
-        fase_A13=False #Empezamos fase convectiva
+        Fase_A1=False #Empezamos fase convectiva
     else:   
-        fase_A13=True #Continuamos la fase radiativa
-    return fase_A13
+        Fase_A1=True #Continuamos la fase radiativa
+    return Fase_A1
 
 @njit
 def politropo(K,T_i1_est):
+    """
+    Paso "politropo" de los algoritmos. Calcula la "presión calculada" en la capa i+1 usando la expresión de un polítropo de constante n=3
+
+    Args:
+        K: Constante del polítropo
+        T_i1_est: Temperatura estimada en la capa i+1
+             
+    Returns:
+        P_i1_est: Presión estimada en la capa i+1
+    """
     P_i1_est=K*T_i1_est**2.5
     return P_i1_est
 
 @njit
 def primeras_3_capas_externas(r_down,P,f_P,T,f_T,L,f_L,M,f_M,L_total,M_total,R_total,X,Z,mu,h_down):
-    for i in range(0,3): #Primeras 3 capas. Calcula P,T,L,M en las 3 capas y f_P,f_T,f_L,f_M en las dos primeras capas
+    """
+    Calcula los valores de la presión, temperatura, luminosidad y masa y d/dr de todas de ellas en las 3 primeras capas de la discretización empezando en la superficie.
+
+        Args:
+            r_down: Vector equiespaciado de la superficie al centro
+            P: Vector con la presión a lo largo de la discretización
+            f_P: Vector con el valor de dP/dr a lo largo de la discretización    
+            T: Vector con la temperatura a lo largo de la discretización
+            f_T: Vector con el valor de dT/dr a lo largo de la discretización    
+            L: Vector con la luminosidad a lo largo de la discretización
+            f_L: Vector con el valor de dL/dr a lo largo de la discretización    
+            M: Vector con la masa a lo largo de la discretización
+            f_M: Vector con el valor de dM/dr a lo largo de la discretización    
+            L_total: Luminosidad total
+            M_total: Masa total
+            R_total: Radio total
+            X: Fracción en masa de hidrógeno
+            Z: Metalicidad
+            mu: Peso molecular medio
+            h_down: Paso de la discretización
+                 
+        Returns:
+            P: Vector con la presión en las 3 primeras capas
+            f_P: Vector con el valor de dP/dr en las 3 primeras capas
+            T: Vector con la temperatura en las 3 primeras capas
+            f_T: Vector con el valor de dT/dr en las 3 primeras capas
+            L: Vector con la luminosidad en las 3 primeras capas
+            f_L: Vector con el valor de dL/dr en las 3 primeras capas
+            M: Vector con la masa en las 3 primeras capas
+            f_M: Vector con el valor de dM/dr en las 3 primeras capas
+    """
+    for i in range(0,3): 
         (P[i],T[i])=ecuacion_35_36(r_down[i],M_total,R_total,L_total,X,Z,mu)
         L[i]=L_total; M[i]=M_total; 
         f_L[i]=0;f_M[i]=0 #La M y L permanecen constantes
@@ -372,6 +579,42 @@ def primeras_3_capas_externas(r_down,P,f_P,T,f_T,L,f_L,M,f_M,L_total,M_total,R_t
     return P,f_P,T,f_T,L,f_L,M,f_M
 
 def fase_radiativa_A1(h,P,f_P,T,f_T,i,mu,r,M,f_M,L,f_L,X,Z,E,n):
+    """
+    Calcula los valores de la presión, temperatura, luminosidad y masa y d/dr de todas de ellas 
+    en las capas de la discretización con transporte radiativa. Para ello usa el algoritmo A.1.
+
+        Args:
+            h: Paso de la discretización
+            P: Vector con la presión a lo largo de la discretización
+            f_P: Vector con el valor de dP/dr a lo largo de la discretización    
+            T: Vector con la temperatura a lo largo de la discretización
+            f_T: Vector con el valor de dT/dr a lo largo de la discretización
+            i: Capa en la que estamos haciendo los cálculos
+            mu: Peso molecular medio
+            r: Vector equiespaciado de la superficie al centro
+            M: Vector con la masa a lo largo de la discretización
+            f_M: Vector con el valor de dM/dr a lo largo de la discretización    
+            L: Vector con la luminosidad a lo largo de la discretización
+            f_L: Vector con el valor de dL/dr a lo largo de la discretización    
+            X: Fracción en masa de hidrógeno
+            Z: Metalicidad
+            E: Lista que indica el tipo de ciclo usado (pp o CNO) para la generación de energía en cada capa de la discretización
+            n: Parámetro para estudiar el tipo de transporte predominante
+                 
+        Returns:
+            P: Vector con la presión en las 3 primeras capas
+            f_P: Vector con el valor de dP/dr en las 3 primeras capas
+            T: Vector con la temperatura en las 3 primeras capas
+            f_T: Vector con el valor de dT/dr en las 3 primeras capas
+            L: Vector con la luminosidad en las 3 primeras capas
+            f_L: Vector con el valor de dL/dr en las 3 primeras capas
+            M: Vector con la masa en las 3 primeras capas
+            f_M: Vector con el valor de dM/dr en las 3 primeras capas
+            n: Parámetro para estudiar el tipo de transporte predominante
+            E: Lista que indica el tipo de ciclo usado (pp o CNO) para la generación de energía en cada capa de la discretización
+            Fase_A1: Variable booleana. True indica que continua la fase radiativa y los valores hallados en la capa i+1 son válidos. False indica que el transporte es convectivo y desecha los cálculos en la fase i+1.
+            K: Constante politrópica
+    """
     (P_i1_est,T_i1_est)=paso2(h,P,f_P,T,f_T,i)
     (M_i1_cal,f_M)=paso3(mu,T_i1_est,P_i1_est,r,i,f_M,h,M)
     (P_i1_cal,f_P)=paso4(h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est)
@@ -380,8 +623,8 @@ def fase_radiativa_A1(h,P,f_P,T,f_T,i,mu,r,M,f_M,L,f_L,X,Z,E,n):
     (T_i1_cal,f_T)=paso7(h,X,Z,mu,L_i1_cal,i,P_i1_cal,T_i1_est,r,T,f_T)
     (T_i1_cal,f_T)=paso8(T_i1_cal,P_i1_cal,h,mu,M_i1_cal,r,i,P,P_i1_est,f_P,T_i1_est,Z,T,f_T,M,f_M,L,f_L,X)
     n[i+1]=paso9(T_i1_cal,P_i1_cal,f_P,f_T,i)
-    fase_A13=paso10(n,i)
-    if fase_A13==True: #El transporte sigue siendo radiativo y los cálculos son válidos
+    fase_A1=paso10(n,i)
+    if fase_A1==True: #El transporte sigue siendo radiativo y los cálculos son válidos
         P[i+1]=P_i1_cal
         T[i+1]=T_i1_cal
         M[i+1]=M_i1_cal
@@ -397,9 +640,43 @@ def fase_radiativa_A1(h,P,f_P,T,f_T,i,mu,r,M,f_M,L,f_L,X,Z,E,n):
                 E+=['CNO']
     #En caso contrario, fase_A1==False, el tranporte pasa a ser convectivo y los cálculos en la última capa no son válidos
     K=P_i1_cal/T_i1_cal**2.5 #Constante del polítropo que usaremos en la fase A.2 suponiendola constante
-    return P,f_P,T,f_T,L,f_L,M,f_M,n,E,fase_A13,K
+    return P,f_P,T,f_T,L,f_L,M,f_M,n,E,fase_A1,K
 
 def fase_convectiva_A2(K,h,i,r,mu,T,f_T,M,f_M,P,f_P,L,f_L,Z,X,E):
+    """
+    Calcula los valores de la presión, temperatura, luminosidad y masa y d/dr de todas de ellas 
+    en las capas de la discretización con transporte convectivo. Para ello usa el algoritmo A.2.
+
+        Args:
+            K: Constante politrópica
+            h: Paso de la discretización
+            i: Capa en la que estamos haciendo los cálculos
+            r: Vector equiespaciado de la superficie al centro
+            mu: Peso molecular medio
+            T: Vector con la temperatura a lo largo de la discretización
+            f_T: Vector con el valor de dT/dr a lo largo de la discretización
+            M: Vector con la masa a lo largo de la discretización
+            f_M: Vector con el valor de dM/dr a lo largo de la discretización    
+            P: Vector con la presión a lo largo de la discretización
+            f_P: Vector con el valor de dP/dr a lo largo de la discretización    
+            L: Vector con la luminosidad a lo largo de la discretización
+            f_L: Vector con el valor de dL/dr a lo largo de la discretización    
+            Z: Metalicidad
+            X: Fracción en masa de hidrógeno
+            E: Lista que indica el tipo de ciclo usado (pp o CNO) para la generación de energía en cada capa de la discretización
+                 
+        Returns:
+            T: Vector con la temperatura en las 3 primeras capas
+            f_T: Vector con el valor de dT/dr en las 3 primeras capas
+            P: Vector con la presión en las 3 primeras capas
+            f_P: Vector con el valor de dP/dr en las 3 primeras capas
+            M: Vector con la masa en las 3 primeras capas
+            f_M: Vector con el valor de dM/dr en las 3 primeras capas            
+            L: Vector con la luminosidad en las 3 primeras capas
+            f_L: Vector con el valor de dL/dr en las 3 primeras capas
+            E: Lista que indica el tipo de ciclo usado (pp o CNO) para la generación de energía en cada capa de la discretización
+            Fase_A2: Variable booleana. True indica que continua la fase convectiva y los valores hallados en la capa i+1 son válidos. False indica que hemos llegado al centro de la estrella.
+    """
     T_i1_est=paso2bis(K,h,T,f_T,i)
     P_i1_est=politropo(K,T_i1_est)
     (M_i1_cal,f_M)=paso3(mu,T_i1_est,P_i1_est,r,i,f_M,h,M)
@@ -426,7 +703,27 @@ def fase_convectiva_A2(K,h,i,r,mu,T,f_T,M,f_M,P,f_P,L,f_L,Z,X,E):
         E+=['CNO']
     return T,f_T,P,f_P,M,f_M,L,f_L,E,fase_A2
 
-def valores_en_la_frontera_down(n,r,P,T,L,M,i_frontera): #Valores interpolados en la frontera cuando integramos desde la superficie
+def valores_en_la_frontera_down(n,r,P,T,L,M,i_frontera): 
+    """
+    Calcula los valores interpolados de la presión, temperatura, luminosidad y masa en el radio donde
+    se encuentra la frontera entre el núcleo y envoltura cuando integramos desde la superficie.
+
+        Args:
+            n: Parámetro para estudiar el tipo de transporte predominante
+            r: Vector equiespaciado de la superficie al centro
+            P: Vector con la presión a lo largo de la discretización
+            T: Vector con la temperatura a lo largo de la discretización
+            L: Vector con la luminosidad a lo largo de la discretización
+            M: Vector con la masa a lo largo de la discretización
+            i: Capa previa a la frontera
+                 
+        Returns:
+            r_frontera: Valor del radio donde se encuentra la frontera (donde n=2.5)
+            P_frontera: Valor interpolado de la presión en la frontera
+            T_frontera: Valor interpolado de la temperatura en la frontera
+            L_frontera: Valor interpolado de la luminosidad en la frontera
+            M_frontera: Valor interpolado de la masa en la frontera
+    """
     n_temp=[n[i_frontera],n[i_frontera+1]]
     r_temp=[r[i_frontera],r[i_frontera+1]]; r_frontera=interpolacion_lineal([[n_temp[0],r_temp[0]],[n_temp[1],r_temp[1]]],1.5)
     P_temp=[P[i_frontera],P[i_frontera+1]]; P_frontera=interpolacion_lineal([[n_temp[0],P_temp[0]],[n_temp[1],P_temp[1]]],1.5)
@@ -435,7 +732,61 @@ def valores_en_la_frontera_down(n,r,P,T,L,M,i_frontera): #Valores interpolados e
     M_temp=[M[i_frontera],M[i_frontera+1]]; M_frontera=interpolacion_lineal([[n_temp[0],M_temp[0]],[n_temp[1],M_temp[1]]],1.5)
     return r_frontera,P_frontera,T_frontera,L_frontera,M_frontera
 
-def valores_en_la_frontera_up(n,r,P,T,L,M,j_frontera,r_frontera): #Valores interpolados en la frontera cuando integramos desde el núcleo
+@njit
+def primeras_3_capas_internas(r,M,f_M,L,f_L,T,f_T,P,K,mu,Z,X,T_central):
+    """
+    Calcula los valores de la presión, temperatura, luminosidad y masa y d/dr de todas de ellas en las 3 primeras capas de la discretización empezando en el centro.
+
+        Args:
+            r: Vector equiespaciado del centro a la superficie
+            M: Vector con la masa a lo largo de la discretización
+            f_M: Vector con el valor de dM/dr a lo largo de la discretización    
+            L: Vector con la luminosidad a lo largo de la discretización
+            f_L: Vector con el valor de dL/dr a lo largo de la discretización    
+            T: Vector con la temperatura a lo largo de la discretización
+            f_T: Vector con el valor de dT/dr a lo largo de la discretización    
+            P: Vector con la presión a lo largo de la discretización
+            K: Constante politrópica
+            mu: Peso molecular medio
+            Z: Metalicidad
+            X: Fracción en masa de hidrógeno
+            T_central: Temperatura en el centro de la estrella
+                 
+        Returns:
+            M: Vector con la masa en las 3 primeras capas
+            f_M: Vector con el valor de dM/dr en las 3 primeras capas
+            L: Vector con la luminosidad en las 3 primeras capas
+            f_L: Vector con el valor de dL/dr en las 3 primeras capas
+            T: Vector con la temperatura en las 3 primeras capas
+            f_T: Vector con el valor de dT/dr en las 3 primeras capas
+            P: Vector con la presión en las 3 primeras capas
+    """
+    T[0]=T_central;L[0]=0;M[0]=0
+    P[0]=K*T[0]**2.5
+    for j in range(1,3):
+        (M,L,T,P)=ecuacion_43_44_45_46(mu,T_central,r,K,X,Z,j,M,L,T,P)
+    return M,f_M,L,f_L,T,f_T,P #No necesitamos f_P porque usamos la ecuación del polítropo
+
+def valores_en_la_frontera_up(n,r,P,T,L,M,j_frontera,r_frontera):
+    """
+    Calcula los valores interpolados de la presión, temperatura, luminosidad y masa en el radio donde
+    se encuentra la frontera entre el núcleo y envoltura cuando integramos desde el núcleo.
+
+        Args:
+            n: Parámetro para estudiar el tipo de transporte predominante
+            P: Vector con la presión a lo largo de la discretización
+            T: Vector con la temperatura a lo largo de la discretización
+            L: Vector con la luminosidad a lo largo de la discretización
+            M: Vector con la masa a lo largo de la discretización
+            j_frontera: Capa previa a la frontera
+            r_frontera: Valor del radio donde se encuentra la frontera (donde n=2.5)
+                 
+        Returns:
+            P_frontera: Valor interpolado de la presión en la frontera
+            T_frontera: Valor interpolado de la temperatura en la frontera
+            L_frontera: Valor interpolado de la luminosidad en la frontera
+            M_frontera: Valor interpolado de la masa en la frontera
+    """
     r_temp=[r[j_frontera],r[j_frontera+1]]
     P_temp=[P[j_frontera],P[j_frontera+1]]; P_frontera=interpolacion_lineal([[r_temp[0],P_temp[0]],[r_temp[1],P_temp[1]]],r_frontera)
     T_temp=[T[j_frontera],T[j_frontera+1]]; T_frontera=interpolacion_lineal([[r_temp[0],T_temp[0]],[r_temp[1],T_temp[1]]],r_frontera)
@@ -443,17 +794,27 @@ def valores_en_la_frontera_up(n,r,P,T,L,M,j_frontera,r_frontera): #Valores inter
     M_temp=[M[j_frontera],M[j_frontera+1]]; M_frontera=interpolacion_lineal([[r_temp[0],M_temp[0]],[r_temp[1],M_temp[1]]],r_frontera)
     return P_frontera,T_frontera,L_frontera,M_frontera
 
-@njit
-def primeras_3_capas_internas(r,M,f_M,L,f_L,T,f_T,P,K,mu,Z,X,T_central):
-    T[0]=T_central;L[0]=0;M[0]=0
-    P[0]=K*T[0]**2.5
-    for j in range(1,3):
-        (M,L,T,P)=ecuacion_43_44_45_46(mu,T_central,r,K,X,Z,j,M,L,T,P)
-    return M,f_M,L,f_L,T,f_T,P #No necesitamos f_P porque usamos la ecuación del polítropo
+def main(M_total,R_total,L_total,T_central,X,Y,capas=100,it1=12,aux1=20,plot1=False): 
+    """
+    MAIN
+    
+        Args:
+            n: Parámetro para estudiar el tipo de transporte predominante
+            P: Vector con la presión a lo largo de la discretización
+            T: Vector con la temperatura a lo largo de la discretización
+            L: Vector con la luminosidad a lo largo de la discretización
+            M: Vector con la masa a lo largo de la discretización
+            j_frontera: Capa previa a la frontera
+            r_frontera: Valor del radio donde se encuentra la frontera (donde n=2.5)
+                 
+        Returns:
+            P_frontera: Valor interpolado de la presión en la frontera
+            T_frontera: Valor interpolado de la temperatura en la frontera
+            L_frontera: Valor interpolado de la luminosidad en la frontera
+            M_frontera: Valor interpolado de la masa en la frontera
+    """
 
-
-
-def main(M_total,R_total,L_total,T_central,X,Y,capas=100,it1=12,aux1=20,plot1=False): #Datos particulares M_total,X,Y. Valores iniciales R_total,L_total,T_central
+    #Datos particulares M_total,X,Y. Valores iniciales R_total,L_total,T_central
     #Suponemos estrella homogenea en composicion qui­mica y material completamente ionizado y consideraremos el peso medio molecular constante en todo el modelo.
     Z=1-X-Y #Fraccion elementos pesados
     mu=1/(2*X+0.75*Y+0.5*Z) #Peso molecular medio
