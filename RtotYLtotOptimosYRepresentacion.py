@@ -55,11 +55,17 @@ def modelo_sin_optimizar_R_y_L(M_total,R_total,L_total,T_central,X,Y,capas,it1,a
     if plot2==True:
         P_norm=P/amax(P);T_norm=T/amax(T); L_norm=L/amax(L); M_norm=M/amax(M);rho_norm=rho/amax(rho)
         plt.figure()
-        p1,p2,p3,p4,p5=plt.plot(r_down,P_norm,r_down,T_norm,r_down,L_norm,r_down,M_norm,r_down,rho_norm)
+        p1, = plt.plot(r_down, P_norm, linestyle='-', label='Presión') # Gráfica de la Presión con línea continua
+        p2, = plt.plot(r_down, T_norm, linestyle='--', label='Temperatura')# Gráfica de la Temperatura con línea punteada       
+        p3, = plt.plot(r_down, L_norm, linestyle='-.', label='Luminosidad') # Gráfica de la Luminosidad con línea de puntos y guiones
+        p4, = plt.plot(r_down, M_norm, linestyle=':', label='Masa')# Gráfica de la Masa con línea de puntos más largos
+        p5, = plt.plot(r_down, rho_norm, linestyle='dotted', label='Densidad') # Gráfica de la Densidad con línea de puntos pequeños
+        plt.axvline(x=r_frontera, linestyle='dashed',color='grey',label='Frontera',alpha=0.35) #Opacidad del 35% para poder ver el salto de las magnitudes
         plt.title('Magnitudes normalizadas para M='+str("{0:.3f}".format(M_total)),fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10)
         plt.xlabel('Radio '+r'$(10^{10} cm)$')
         plt.ylabel('Magnitudes físicas normalizadas')
-        plt.legend(['Presión','Temperatura','Luminosidad','Masa','Densidad'])        
+        plt.legend(handles=[p1, p2, p3, p4, p5,plt.Line2D([], [], linestyle='dashed', color='grey', label='Frontera', alpha=0.2)])
+
         
 #Para exportar la tabla "modelo completo" a latex: print(tabulate(modelocompleto,headers='firstrow',tablefmt='latex',stralign='center',floatfmt='.7f'))
 
@@ -112,12 +118,10 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
             -Integración desde el centro: [Primeras 3 capas internas - Fase A.2. (hasta la frontera del núcleo) - Parámertros inteporlados en la frontera (requiere calcular una capa extra en la envoltura)]
             -Errores relativos entre las soluciones down y up
             -Tabla del modelo completo (unión de las soluciones down y up y concatenación de las capas desde 0.9R_total a R_total)
-            
     """
     #RESOLUCIÓN DE LA ESTRELLA VARIANDO R_total Y L_total--------------------------------------------------------------------------------------------------------
-    deltaR=0.1; deltaL=1; profundidad=12 
-    
     R_vector=[R_total];L_vector=[L_total]
+    # R_vector=[R_total];L_vector=[42.5] #Para los datos propuestos dice buscar en los intervalos (R_total=[11.5,12.5] y L_total=[35.0,50.0])
     for r in range(profundidad//2):
         R_vector=[R_vector[0]-deltaR]+R_vector+[R_vector[-1]+deltaR]
         L_vector=[L_vector[0]-deltaL]+L_vector+[L_vector[-1]+deltaL]   
@@ -166,7 +170,7 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
                 plt.show()
         mejora=False #Solo representamos Err_Mat cuando en la iteración actual el error en en alguno casilla es menor que el error mínimo alcanzado hasta ahora
         
-        deltaR*=0.8; deltaL*=0.8; #Hacemos el paso del mallado más fino
+        deltaR*=0.7; deltaL*=0.7; #Hacemos el paso del mallado más fino
         R_vector=[R_total];L_vector=[L_total]
         for r in range(profundidad//2):
             R_vector=[R_vector[0]-deltaR]+R_vector+[R_vector[-1]+deltaR]
@@ -211,12 +215,16 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
         #Normalizado
         P_norm=P/amax(P);T_norm=T/amax(T); L_norm=L/amax(L); M_norm=M/amax(M);rho_norm=rho/amax(rho)
         plt.figure()
-        p1,p2,p3,p4,p5=plt.plot(r_down,P_norm,r_down,T_norm,r_down,L_norm,r_down,M_norm,r_down,rho_norm)
-        plt.axvline(x=r_fronterasave,color="grey")
+        p1, = plt.plot(r_down, P_norm, linestyle='-', label='Presión') # Gráfica de la Presión con línea continua
+        p2, = plt.plot(r_down, T_norm, linestyle='--', label='Temperatura')# Gráfica de la Temperatura con línea punteada       
+        p3, = plt.plot(r_down, L_norm, linestyle='-.', label='Luminosidad') # Gráfica de la Luminosidad con línea de puntos y guiones
+        p4, = plt.plot(r_down, M_norm, linestyle=':', label='Masa')# Gráfica de la Masa con línea de puntos más largos
+        p5, = plt.plot(r_down, rho_norm, linestyle='dotted', label='Densidad') # Gráfica de la Densidad con línea de puntos pequeños
+        plt.axvline(x=r_fronterasave, linestyle='dashed',color='grey',label='Frontera',alpha=0.35) #Opacidad del 35% para poder ver el salto de las magnitudes
         plt.title('Magnitudes normalizadas para M='+str("{0:.3f}".format(M_total)),fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10)
         plt.xlabel('Radio '+r'$(10^{10} cm)$')
         plt.ylabel('Magnitudes físicas normalizadas')
-        plt.legend(['Presión','Temperatura','Luminosidad','Masa','Densidad'])
+        plt.legend(handles=[p1, p2, p3, p4, p5,plt.Line2D([], [], linestyle='dashed', color='grey', label='Frontera', alpha=0.2)])
     M_total=M[0];L_total=L[0]
     return (R_total,M_total,L_total,T_central,r_down,P,T,L,M,rho,M_frontera)
 

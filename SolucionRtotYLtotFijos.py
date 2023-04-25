@@ -54,7 +54,7 @@ def ritmo_generacion_energia(tipo_ciclo,T,X,Z,rho=1):
     
     Args:
         tipo_ciclo: Dos posibles valores: 'pp' o 'CNO' en función del mecanismo de generación de energía. Para cualquier otro valor devuelve los parámetros iguales a 0
-        T: Temperatura en K
+        T: Temperatura en 10^6 K
         X: Fracción en masa de hidrógeno
         Z: Metalicidad. Fracción en masa de todo aquello que no es ni hidrógeno ni helio (Z=1-X-Y)
         rho: Densidad. Por defecto es 1
@@ -991,7 +991,7 @@ def main(M_total,R_total,L_total,T_central,X,Y,capas=100,it1=12,aux1=20,plot1=Fa
     n=[round(elem, 5) for elem in n];n=[0]*capas_previas+n;n=['---' if x<=0.001 else x for x in n]
     del E_up[-1];E_up=E_up[::-1] #La última componente de E_up sin invertir corresponde a la capa adicional fuera del núcleo usada para interpolar
     E=['---']*capas_previas+E+E_up    
-    rho=P*mu/(T*8.31447*10**7);rho_107=rho*10**7 #rho está en g/cm^3 y rho_107 está en g/cm^-3 (10^-7)
+    rho=P*mu/(T*8.31447*10**7);rho_107=rho*10**7 #rho está en g/cm^3 y rho_107 está en (10^-7) g/cm^-3 
     for s in range(0,capas+capas_previas+1):
         modelocompleto+=[[E[s],fase[s],str(i[s]),r_down[s],P[s],T[s],L[s],M[s],rho_107[s],n[s]]]
     B=[['Primeras 3 capas internas:','Capas posteriores hasta la frontera del núcleo:','Salimos del núcleo. Calculamos una capa adicional suponiendo convectivo:','Parámetros físicos interpolados en la frontera entre el núcleo y la envoltura:','Errores relativos entre las soluciones down y up (%):'],[primeras3capasinternas,faseA2interna,capaadicional,frontera_nucleo_envoltura,errorrelativodownup]]

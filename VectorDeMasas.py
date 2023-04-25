@@ -50,50 +50,56 @@ for i in range(len(rho)):
     rhoc+=[rho[i][-1]]
 
 qc=array(M_frontera)/array(M_total) #Fracción en masa del núcleo convectivo
-    
-# A0=['M/M_sun','log(L/L_sun)','log(T_ef)','R/R_sun','q_c','rho_average','log(Tc)'] 
-# A1=[array(M_total)/1.989,log10(array(L_total)/3.828),log10(Tef),array(R_total)/6.957,None,None,log10(array(Tc))]
 
 A=[['M/M_sun','log(L/L_sun)','log(T_ef)','R/R_sun','qc','log(rho_c)','log(Tc)']]
 for i in range(len(M_total)):
     A+=[[M_total[i]/1.989,log10(L_total[i]/3.828),log10(Tef[i]),R_total[i]/6.957,qc[i],log10(rhoc[i]*10**7),log10(Tc[i]*10**7)]]
 print(tabulate(A, headers='firstrow', tablefmt='fancy_grid',stralign='center',floatfmt='.7f'))
 
-    
+#%%  
 #REPRESENTACIÓN------------------------------------------------------------------------------------------
-#Relación Luminosidad total - Masa total (proporcionalidad k=18, ajustada a mano)
-plt.figure()
-plt.title('Relación masa total - luminosidad total',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
-plt.plot(M_total,L_total,color='blue',label='Resultado modelo')
-plt.plot(M_total,18*mu**4*array(M_total)**3,color='red',label='Relación homóloga') 
-plt.ylabel('L_total')
-plt.xlabel('M_total')
-plt.legend()
+#Relación Luminosidad total - Masa total (proporcionalidad k=, ajustada a mano)
+L_total_tabulada=10**array([3.43,3.2,2.99,2.89,2.77,2.57,2.48,2.19,1.86,1.8,1.58,1.49,1.38,1.23,1.13,1.09,1.05,1,0.96,0.92])
+M_total_tabulada_M_sun=[7.3,6.1,5.4,5.1,4.7,4.3,3.92,3.38,2.75,2.68,2.18,2.05,1.98,1.86,1.93,1.88,1.83,1.77,1.81,1.75]
+#NO logarítmica
+# plt.figure()
+# plt.title('Relación masa total - luminosidad total',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
+# plt.plot(M_total,L_total,color='blue',label='Resultado modelo')
+# plt.plot(M_total,17*mu**4*array(M_total)**3,color='red',label='Relación homóloga') 
+# plt.ylabel('L_total')
+# plt.xlabel('M_total')
+# plt.legend()
 
+#Logarítmica
 plt.figure()
 plt.title('Relación masa total - luminosidad total (logarítmica)',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
 plt.plot(log10(array(M_total)/1.989),log10(array(L_total)/3.828),color='blue',label='Resultado modelo')
-plt.plot(log10(array(M_total)/1.989),log10((18*mu**4*array(M_total)**3)/3.828),color='red',label='Relación homóloga') 
+plt.plot(log10(array(M_total)/1.989),log10((2*mu**4*array(M_total)**3)/3.828),color='red',label='Relación homóloga') 
+plt.plot(log10(M_total_tabulada_M_sun),log10(L_total_tabulada/3.828),label='Datos tabulados')
 plt.ylabel('log(L_total/L_sun)')
 plt.xlabel('log(M_total/M_sun)')
 plt.legend()
 
 
 #Relación Radio total - Masa total (falta añadir proporcionalidad relación homóloga)
-plt.figure()
-plt.title('Relación masa total - radio total',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
-plt.plot(M_total,R_total,color='blue',label='Resultado modelo')
-plt.plot(M_total,mu**0.67*array(M_total)**0.81,color='red',label='Relación homóloga (ciclo CNO)') #Ciclo CNO (v=18)
-plt.plot(M_total,array(M_total)**0.43,color='orange',label='Relación homóloga (cadena pp') #Cadena pp (v=4)
-plt.ylabel('R_total')
-plt.xlabel('M_total')
-plt.legend()
+R_total_tabulado_R_sun=[4.06,3.89,3.61,3.46,3.36,3.27,2.94,2.86,2.49,2.45,2.193,2.136,2.117,1.861,1.794,1.785,1.775,1.75,1.747,1.747]
+#NO logarítmica
+# plt.figure()
+# plt.title('Relación masa total - radio total',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
+# plt.plot(M_total,R_total,color='blue',label='Resultado modelo')
+# plt.plot(M_total,mu**0.67*array(M_total)**0.81,color='red',label='Relación homóloga (ciclo CNO)') #Ciclo CNO (v=18)
+# plt.plot(M_total,array(M_total)**0.43,color='orange',label='Relación homóloga (cadena pp') #Cadena pp (v=4)
+# plt.ylabel('R_total')
+# plt.xlabel('M_total')
+# plt.legend()
 
+#Logarítmica
 plt.figure()
 plt.title('Relación masa total - radio total (logarítmica)',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
 plt.plot(log10(array(M_total)/1.989),log10(array(R_total)/6.957),color='blue',label='Resultado modelo')
-plt.plot(log10(array(M_total)/1.989),log10((mu**0.67*array(M_total)**0.81)/6.957),color='red',label='Relación homóloga (ciclo CNO)') #Ciclo CNO (v=18)
-plt.plot(log10(array(M_total)/1.989),log10(array(M_total)**0.43/6.957),color='orange',label='Relación homóloga (cadena pp') #Cadena pp (v=4)
+plt.plot(log10(array(M_total)/1.989),log10(4.3*(mu**0.67*array(M_total)**0.81)/6.957),color='red',label='Relación homóloga (ciclo CNO)') #Ciclo CNO (v=18)
+plt.plot(log10(array(M_total)/1.989),log10(5.45*array(M_total)**0.43/6.957),color='orange',label='Relación homóloga (cadena pp') #Cadena pp (v=4)
+plt.plot(log10(M_total_tabulada_M_sun),log10(array(R_total_tabulado_R_sun)),label='Datos tabulados')
 plt.ylabel('log(R_total/R_sun)')
 plt.xlabel('log(M_total/M_sun)')
 plt.legend()
@@ -121,34 +127,32 @@ plt.xlabel('log(M_total/M_sun)')
 plt.legend()
 
 
-#Relación Presión - Temperatura (logarítmica) para varias masas
-fig, ax = plt.subplots()
-plt.title('Relación presión-temperatura (logarítmica)',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
-for i in range(len(vector_Masa_total)//4): #Representamos solo algunas masas
-    ax.plot(log10(array(P[i+4])*10**15), log10(array(T[i+4]*10**7)), label=str(M_total[i]),linewidth=0.75)
-plt.xlabel('log(P)')
-plt.ylabel('log(T)')
-plt.legend()
-
-
 #Diagrama HR (Luminosidad total - Temperatura efectiva) (Falta añadir relaciones homólogas)
-plt.figure()
-plt.title('Diagrama HR',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
-plt.plot(Tef,array(L_total)/3.828)
-plt.ylabel('L_total/L_sun')
-plt.xlabel('T_ef')
-plt.gca().invert_xaxis() #El eje x en el diagrama HR está invertido
-plt.legend()
+Tef_tabulada=[20600,18500,17000,16400,15700,14500,14000,12300,10700,10400,9700,9300,8800,8600,8250,8100,7910,7760,7590,7400,7220,7020,6820,6750,6670,6550,6350,6280,6180,6050]
+L_total_tabulada=10**array([3.43,3.2,2.99,2.89,2.77,2.57,2.48,2.19,1.86,1.8,1.58,1.49,1.38,1.23,1.13,1.09,1.05,1,0.96,0.92,0.86,0.79,0.71,0.67,0.62,0.56,0.43,0.39,0.29,0.22,])
 
+#NO logarítmica
+# plt.figure()
+# plt.title('Diagrama HR',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
+# plt.plot(Tef,array(L_total)/3.828, label='Datos del modelo')
+# plt.plot(Tef_tabulada,L_total_tabulada,label='Datos tabulados, composición química solar')
+# plt.ylabel('L_total/L_sun')
+# plt.xlabel('T_ef')
+# plt.gca().invert_xaxis() #El eje x en el diagrama HR está invertido
+# plt.legend()
+
+#Logarítmica
 plt.figure()
 plt.title('Diagrama HR (logarítmica)',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=12)
 plt.plot(log10(Tef),log10(array(L_total)/3.828),color='blue',label='Resultado modelo')
-# plt.plot(logTef,5.6*logTef,color='red',label='M baja, cadena p-p')
-# plt.plot(logTef,8.7*logTef,color='orange',label='M alta, ciclo CNO')
+plt.plot(log10(Tef_tabulada),log10(L_total_tabulada),label='Datos tabulados, composición química solar')
+plt.plot(log10(Tef),5.6*log10(Tef)-20.8,color='red',label='Observacionalmente: M baja, cadena p-p') #Hemos cogido la constante=-20.8
+# plt.plot(log10(Tef),8.7*log10(Tef)-34,color='orange',label='M alta, ciclo CNO') #Hemos cogido la constante=-34.8 (no sale la misma pendiente porque ajusta bien para masa mayores de 10M_sun y lo máximo que estamos cogiendo es 6.5M_sun)
 plt.ylabel('log(L_total/L_sun)')
 plt.xlabel('log(T_ef)')
 plt.gca().invert_xaxis() #El eje x en el diagrama HR está invertido
 plt.legend()
+
 
 #Tabla con los resultados
 

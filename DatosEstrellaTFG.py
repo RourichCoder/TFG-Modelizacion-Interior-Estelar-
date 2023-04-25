@@ -19,10 +19,11 @@ import matplotlib.pyplot as plt
 #PARÁMETROS DEL MODELO --------------------------------------------------------------------------------------------------------------------
 X=0.75; Y=0.20; M_total=5 #Parámetros característicos de la estrella
 R_total=12; L_total=40.0; T_central=1.5; #Valores iniciales
-capas=100;it1=10;aux1=20;iteraciones=20  #Parametros del mallado
+capas=100;it1=12;aux1=10;iteraciones=10;deltaR=0.1;deltaL=1;profundidad=16 #Parametros del mallado
+representacion1=True;representacion2=True;representacion3=True;representacion4=True;representacion5=True
 
 #MODELO TFG, sin optimizar y optimizado
 modelo_sin_optimizar_R_y_L(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,plot1=True,plot2=True) #Printea todas las tablas con los resultados del procedimiento de integración y representa el error total en función de la temperatura central y las magnitudes normalizas (en la misma figura) en función del radio.
-modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1=True,representacion2=True,representacion3=True,representacion4=True,representacion5=True) #Printea el modelo óptimo y todas las gráficas sobre el proceso y los resultados
+(R_total,M_total,L_total,T_central,r_down,P,T,L,M,rho,M_frontera)=modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1,representacion2,representacion3,representacion4,representacion5,deltaR,deltaL,profundidad) #Printea el modelo óptimo y todas las gráficas sobre el proceso y los resultados
 
 
