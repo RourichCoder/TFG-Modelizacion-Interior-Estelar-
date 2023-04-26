@@ -933,7 +933,7 @@ def main(M_total,R_total,L_total,T_central,X,Y,capas=100,it1=12,aux1=20,plot1=Fa
     primeras3capasinternas=[['E','fase','i  ','r    ','P    ','T    ','L    ','M    ']]    
     (M_nuc,f_M_nuc,L_nuc,f_L_nuc,T_nuc,f_T_nuc,P_nuc)=primeras_3_capas_internas(r_up,M_nuc,f_M_nuc,L_nuc,f_L_nuc,T_nuc,f_T_nuc,P_nuc,K,mu,Z,X,T_central)
     for i in range(0,3):
-        E_up+=['---'];fase_up+=['centro']
+        E_up+=['---'];fase_up+=['CENTRO']
         primeras3capasinternas+=[[E_up[i],fase_up[i],i,r_up[i],P_nuc[i],T_nuc[i],L_nuc[i],M_nuc[i]]]
     j=2
     

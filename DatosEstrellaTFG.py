@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 #PARÁMETROS DEL MODELO --------------------------------------------------------------------------------------------------------------------
 X=0.75; Y=0.20; M_total=5 #Parámetros característicos de la estrella
 R_total=12; L_total=40.0; T_central=1.5; #Valores iniciales
-capas=100;it1=12;aux1=10;iteraciones=10;deltaR=0.1;deltaL=1;profundidad=16 #Parametros del mallado
+capas=100;it1=12;aux1=20;iteraciones=10;deltaR=0.1;deltaL=1;profundidad=16 #Parametros del mallado
 representacion1=True;representacion2=True;representacion3=True;representacion4=True;representacion5=True
 
 #MODELO TFG, sin optimizar y optimizado

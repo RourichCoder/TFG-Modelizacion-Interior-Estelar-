@@ -41,6 +41,7 @@ for i in range(len(vector_Masa_total)):
     print('Masa total =',vector_Masa_total[i])
     (R_total[i],M_total[i],L_total[i],T_central[i],r_down[i],P[i],T[i],L[i],M[i],rho[i],M_frontera[i])=modelo_optimizado_para_X_Y_y_M(vector_Masa_total[i],vector_Valores_iniciales[i][0],vector_Valores_iniciales[i][1],vector_Valores_iniciales[i][2],X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=False,representacion4=False,representacion5=False)
 
+#%%  
 #CÁLCULO MAGNITUDES--------------------------------------------------------------------------------------
 Tef=5777*((6.957/array(R_total))**2*(array(L_total)/3.828))**(1/4) #Temperatura efectiva. Stefan-Boltzman en unidades solares
 Tc=[];rhoc=[]
@@ -49,14 +50,14 @@ for i in range(len(T)):
 for i in range(len(rho)):
     rhoc+=[rho[i][-1]]
 
-qc=array(M_frontera)/array(M_total) #Fracción en masa del núcleo convectivo
 
-A=[['M/M_sun','log(L/L_sun)','log(T_ef)','R/R_sun','qc','log(rho_c)','log(Tc)']]
+#TABLA CON LOS RESULTADOS-----------------------------------------------------------------------------------
+A=[['M/M_sun','log(L/L_sun)','log(T_ef)','R/R_sun','log(Tc)']]
 for i in range(len(M_total)):
-    A+=[[M_total[i]/1.989,log10(L_total[i]/3.828),log10(Tef[i]),R_total[i]/6.957,qc[i],log10(rhoc[i]*10**7),log10(Tc[i]*10**7)]]
+    A+=[[M_total[i]/1.989,log10(L_total[i]/3.828),log10(Tef[i]),R_total[i]/6.957,log10(Tc[i]*10**7)]]
 print(tabulate(A, headers='firstrow', tablefmt='fancy_grid',stralign='center',floatfmt='.7f'))
 
-#%%  
+
 #REPRESENTACIÓN------------------------------------------------------------------------------------------
 #Relación Luminosidad total - Masa total (proporcionalidad k=, ajustada a mano)
 L_total_tabulada=10**array([3.43,3.2,2.99,2.89,2.77,2.57,2.48,2.19,1.86,1.8,1.58,1.49,1.38,1.23,1.13,1.09,1.05,1,0.96,0.92])
@@ -152,12 +153,3 @@ plt.ylabel('log(L_total/L_sun)')
 plt.xlabel('log(T_ef)')
 plt.gca().invert_xaxis() #El eje x en el diagrama HR está invertido
 plt.legend()
-
-
-#Tabla con los resultados
-
-
-
-
-
-
