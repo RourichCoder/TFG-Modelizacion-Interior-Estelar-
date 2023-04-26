@@ -120,8 +120,8 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
             -Tabla del modelo completo (unión de las soluciones down y up y concatenación de las capas desde 0.9R_total a R_total)
     """
     #RESOLUCIÓN DE LA ESTRELLA VARIANDO R_total Y L_total--------------------------------------------------------------------------------------------------------
-    # R_vector=[R_total];L_vector=[L_total]
-    R_vector=[R_total];L_vector=[42.5] #Para los datos propuestos dice buscar en los intervalos (R_total=[11.5,12.5] y L_total=[35.0,50.0])
+    R_vector=[R_total];L_vector=[L_total]
+    # R_vector=[R_total];L_vector=[42.5] #Para los datos propuestos dice buscar en los intervalos (R_total=[11.5,12.5] y L_total=[35.0,50.0])
     for r in range(profundidad//2):
         R_vector=[R_vector[0]-deltaR]+R_vector+[R_vector[-1]+deltaR]
         L_vector=[L_vector[0]-deltaL]+L_vector+[L_vector[-1]+deltaL]   
@@ -158,17 +158,17 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
             plt.show()
             x+=1
             
-            if representacion2:
-                plt.figure(figsize=(32,22));
-                plt.pcolormesh(R_vector,L_vector[::-1],Tc_mat,cmap='viridis')
-                plt.scatter(R_total,L_total,color='red',s=65, linewidths=3)
-                cbar = plt.colorbar()
-                cbar.ax.tick_params(labelsize=25)
-                plt.tick_params(axis='both', labelsize=35)
-                plt.xlabel("Radio total", size = 40) 
-                plt.ylabel("Luminosidad total", size = 40) 
-                plt.title('Tcentral que minimiza el error para cada Rtot y Ltot',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold','size': 48})
-                plt.show()
+        if mejora and representacion2:
+            plt.figure(figsize=(32,22));
+            plt.pcolormesh(R_vector,L_vector[::-1],Tc_mat,cmap='viridis')
+            cbar = plt.colorbar()
+            plt.scatter(R_total,L_total,color='red',s=65, linewidths=3)
+            cbar.ax.tick_params(labelsize=25)
+            plt.tick_params(axis='both', labelsize=35)
+            plt.xlabel("Radio total", size = 40) 
+            plt.ylabel("Luminosidad total", size = 40) 
+            plt.title('Tcentral que minimiza el error para cada Rtot y Ltot',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold','size': 48})
+            plt.show()
         mejora=False #Solo representamos Err_Mat cuando en la iteración actual el error en en alguno casilla es menor que el error mínimo alcanzado hasta ahora
         
         deltaR*=0.7; deltaL*=0.7; #Hacemos el paso del mallado más fino

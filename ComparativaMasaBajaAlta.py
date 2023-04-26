@@ -25,12 +25,12 @@ import matplotlib.pyplot as plt
 '''
 #PARÁMETROS DEL MODELO TFG--------------------------------------------------------------------------------------------------------------------
 X=0.75;Y=0.20;Z=1-X-Y;mu=1/(2*X+0.75*Y+0.5*Z); #Mantenemos constante la composición química
-capas=100;it1=10;aux1=10;iteraciones=4 #Parametros del mallado
+capas=100;it1=10;aux1=10;iteraciones=6 #Parametros del mallado
 
-#MODELO MASA alta (~11.3 M_sun)
-M_total=22.5; print('Masa = 11.3M_sun') #Parámetro característico de la estrella
-R_total=33; L_total=102000 ; T_central=2.9 #Valores iniciales
-(R_total_alta,M_total_alta,L_total_alta,T_central_alta,r_down_alta,P_alta,T_alta,L_alta,M_alta,rho_alta,M_frontera_alta)=modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=True,representacion4=False,representacion5=True)
+#MODELO MASA alta (~9 M_sun)
+M_total=18; print('Masa = 9M_sun') #Parámetro característico de la estrella
+R_total=28; L_total=32500 ; T_central=2.7 #Valores iniciales
+(R_total_alta,M_total_alta,L_total_alta,T_central_alta,r_down_alta,P_alta,T_alta,L_alta,M_alta,rho_alta,M_frontera_alta)=modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=True,representacion4=False,representacion5=True,deltaR=0.1,deltaL=10,profundidad=10)
 
 #MODELO MASA baja (~1.75 M_sun)
 M_total=3.5; print('Masa = 1.75M_sun') #Parámetro característico de la estrella
@@ -48,8 +48,8 @@ P_norm_baja=P_baja/amax(P_baja);T_norm_baja=T_baja/amax(T_baja); L_norm_baja=L_b
 a=float64(10**7*array(rho_alta));b=float64(10**7*array(rho_baja))
 rho_alta_log=log10(a);rho_baja_log=log10(b)
 plt.figure()
-plt.title('Densidad en función del radio relativo',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=11)
-plt.plot(r_down_norm_alta,rho_alta_log,color='blue',label=r'$11.3M_\odot$')
+plt.title('Densidad en función del radio relativo',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10.5)
+plt.plot(r_down_norm_alta,rho_alta_log,color='blue',label=r'$9M_\odot$')
 plt.plot(r_down_norm_baja,rho_baja_log,color='red',label=r'$1.75M_\odot$')
 plt.ylabel(r'log($\rho$)')
 plt.xlabel(r'r/$R_\mathrm{total}$')
@@ -57,8 +57,8 @@ plt.legend()
 
 #MASA. La masa está muy concentrada hacia el centro (cerca del 75% de masa en menos de 0.5r/R que en volumen es...). 
 plt.figure()
-plt.title('Masa relativa en función del radio relativo',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=11)
-plt.plot(r_down_norm_alta,M_norm_alta,color='blue',label=r'$11.3M_\odot$')
+plt.title('Masa relativa en función del radio relativo',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10.5)
+plt.plot(r_down_norm_alta,M_norm_alta,color='blue',label=r'$9M_\odot$')
 plt.plot(r_down_norm_baja,M_norm_baja,color='red',label=r'$1.75M_\odot$')
 plt.ylabel(r'$m/M_\mathrm{total}$')
 plt.xlabel(r'$r/R_\mathrm{total}$')
@@ -66,8 +66,8 @@ plt.legend()
 
 #TEMPERATURA. La temperatura aumenta rápidamente hacia el centro. La estrella más masiva tiene mayor T en cada punto
 plt.figure()
-plt.title('Temperatura en función del radio relativo',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=11)
-plt.plot(r_down_norm_alta,T_alta,color='blue',label=r'$11.3M_\odot$')
+plt.title('Temperatura en función del radio relativo',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10.5)
+plt.plot(r_down_norm_alta,T_alta,color='blue',label=r'$9M_\odot$')
 plt.plot(r_down_norm_baja,T_baja,color='red',label=r'$1.75M_\odot$')
 plt.ylabel(r'$T\quad 10^7 \mathrm{K}$')
 plt.xlabel(r'$r/R_\mathrm{total}$')
@@ -75,8 +75,8 @@ plt.legend()
 
 #LUMNINOSIDAD. Aproximadamente, para 1.75M_sun el 90% de la energía se genera en el 15% interior de la masa y para 11.3M_Sun el 90% de energía se genera en el 25% interior de la masa 
 plt.figure()
-plt.title('Luminosidad relativa en función de la masa relativa',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=11)
-plt.plot(M_norm_alta,L_norm_alta,color='blue',label=r'$11.3M_\odot$')
+plt.title('Luminosidad relativa en función de la masa relativa',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10.5)
+plt.plot(M_norm_alta,L_norm_alta,color='blue',label=r'$9M_\odot$')
 plt.plot(M_norm_baja,L_norm_baja,color='red',label=r'$1.75M_\odot$')
 plt.ylabel(r'$l/L_\mathrm{total}$')
 plt.xlabel(r'$m/M_\mathrm{total}$')
@@ -97,8 +97,8 @@ for i in range(len(T_baja)):
 epsilon_alta_log=log10(epsilon_alta);epsilon_baja_log=log10(epsilon_baja)        
 
 plt.figure()
-plt.title('Generación de energía en función del radio relativo',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=11)
-plt.plot(r_down_norm_alta,epsilon_alta_log,color='blue',label=r'$11.3M_\odot$')
+plt.title('Generación de energía en función del radio relativo',fontdict={'family': 'serif', 'color' : 'darkblue', 'weight': 'bold'},fontsize=10.5)
+plt.plot(r_down_norm_alta,epsilon_alta_log,color='blue',label=r'$9M_\odot$')
 plt.plot(r_down_norm_baja,epsilon_baja_log,color='red',label=r'$1.75M_\odot$')
 plt.ylabel(r'$log(\varepsilon\,[\mathrm{erg\,g^{-1}\,s^{-1}}])$')
 plt.xlabel(r'$r/R_\mathrm{total}$')
