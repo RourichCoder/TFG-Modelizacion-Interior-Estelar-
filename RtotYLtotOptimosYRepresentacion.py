@@ -199,7 +199,6 @@ def modelo_optimizado_para_X_Y_y_M(M_total,R_total,L_total,T_central,X,Y,capas,i
         print('-'*103);print('-'*103);print('MODELO COMPLETO para R_total =',"{0:.4f}".format(R_total),', L_total =',"{0:.4f}".format(L_total),'y T_central =', "{0:.4}".format(T_central))
         print(tabulate(modelocompleto, headers='firstrow', tablefmt='fancy_grid',stralign='center',floatfmt='.7f'))
     print('El error total de este modelo es',"{0:.4f}".format(Err_total))
-    # print(tabulate(modelocompleto,headers='firstrow',tablefmt='latex',stralign='center',floatfmt='.7f'))
     
     #REPRESENTACIÓN GRÁFICA  DEL MODELO QUE OPTIMIZA EL ERROR----------------------------------------------------------------------------------------
     if representacion4:
