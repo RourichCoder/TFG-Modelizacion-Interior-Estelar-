@@ -6,7 +6,6 @@ from SolucionRtotYLtotFijos import epsilon1_nu, ritmo_generacion_energia
 from numba import njit
 from numpy import zeros, ones, linspace, where, concatenate, ones, arange, delete, amin, amax, pi,format_float_scientific, meshgrid, transpose, arange, transpose, identity, array, log, log10, float64, isfinite
 from tabulate import tabulate   
-import time
 import matplotlib.pyplot as plt
 
 '''Resuelve la estructura de dos estrellas con la misma composición química, pero distintas masas
@@ -43,7 +42,7 @@ r_down_norm_baja=r_down_baja/R_total_baja
 P_norm_alta=P_alta/amax(P_alta);T_norm_alta=T_alta/amax(T_alta); L_norm_alta=L_alta/amax(L_alta); M_norm_alta=M_alta/amax(M_alta);rho_norm_alta=rho_alta/amax(rho_alta)
 P_norm_baja=P_baja/amax(P_baja);T_norm_baja=T_baja/amax(T_baja); L_norm_baja=L_baja/amax(L_baja); M_norm_baja=M_baja/amax(M_baja);rho_norm_baja=rho_baja/amax(rho_baja)
 
-#%%
+
 #DENSIDAD. Observamos que la densidad es mayor en las estrellas menos masivas
 a=float64(10**7*array(rho_alta));b=float64(10**7*array(rho_baja))
 rho_alta_log=log10(a);rho_baja_log=log10(b)

@@ -6,7 +6,6 @@ from SolucionRtotYLtotFijos import epsilon1_nu, ritmo_generacion_energia
 from numba import njit
 from numpy import zeros, ones, linspace, where, concatenate, ones, arange, delete, amin, amax, pi,format_float_scientific, meshgrid, transpose, arange, transpose, identity, array, log, log10, float64, isfinite
 from tabulate import tabulate   
-import time
 import matplotlib.pyplot as plt
 
 '''Resuelve la estructura de dos estrellas con la misma masas, pero distintas composición química.

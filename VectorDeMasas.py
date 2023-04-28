@@ -4,7 +4,6 @@ from RtotYLtotOptimosYRepresentacion import modelo_sin_optimizar_R_y_L, modelo_o
 from numba import njit
 from numpy import zeros, ones, linspace, where, concatenate, ones, arange, delete, amin, amax, pi,format_float_scientific, meshgrid, transpose, arange, transpose, identity, array, log10
 from tabulate import tabulate   
-import time
 import matplotlib.pyplot as plt
 
 '''Resuelve la estructura de 20 estrellas con la misma composición química, pero distintas masas.
@@ -38,7 +37,6 @@ for i in range(len(vector_Masa_total)):
     (R_total[i],M_total[i],L_total[i],T_central[i],r_down[i],P[i],T[i],L[i],M[i],rho[i],M_frontera[i])=modelo_optimizado_para_X_Y_y_M(vector_Masa_total[i],vector_Valores_iniciales[i][0],vector_Valores_iniciales[i][1],vector_Valores_iniciales[i][2],X,Y,capas,it1,aux1,iteraciones,representacion1=False,representacion2=False,representacion3=False,representacion4=False,representacion5=False)
 
 
-#%%  
 #DATOS TABULADOS (composición química solar)----------------------------------------------------------------
 L_total_tabulada_corto=10**array([3.43,3.2,2.99,2.89,2.77,2.57,2.48,2.19,1.86,1.8,1.58,1.49,1.38,1.23,1.13,1.09,1.05,1,0.96,0.92])
 M_total_tabulada_M_sun_corto=[7.3,6.1,5.4,5.1,4.7,4.3,3.92,3.38,2.75,2.68,2.18,2.05,1.98,1.86,1.93,1.88,1.83,1.77,1.81,1.75]

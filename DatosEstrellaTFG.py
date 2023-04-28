@@ -4,7 +4,6 @@ from RtotYLtotOptimosYRepresentacion import modelo_sin_optimizar_R_y_L, modelo_o
 from numba import njit
 from numpy import zeros, ones, linspace, where, concatenate, ones, arange, delete, amin, amax, pi,format_float_scientific, meshgrid, transpose, arange, transpose,identity,array
 from tabulate import tabulate   
-import time
 import matplotlib.pyplot as plt
 
 '''Resuelve la estructura de una estrella primero sin variar R_total y L_total y después hallando el R_total y L_total que optimizan el error
